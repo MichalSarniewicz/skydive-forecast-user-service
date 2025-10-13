@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.skydiveforecast</groupId>
-	<artifactId>skydive-forecast</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>skydive-forecast-user-service</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 	<name>skydive-forecast</name>
-	<description>Weather forecast application tailored for skydivers, checking conditions in various locations for a given day.</description>
+	<description>Skydive Forecast - User Service</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -67,9 +67,8 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

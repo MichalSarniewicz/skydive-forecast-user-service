@@ -1,8 +1,16 @@
 spring:
+  profiles:
+    active: dev
   application:
-    name: skydive-forecast
+    name: skydive-forecast-user-service
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
   liquibase:
-    enabled: false
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    database-change-log-table: skydive-forecast.DATABASECHANGELOG
+    database-change-log-lock-table: skydive-forecast.DATABASECHANGELOGLOCK
 
 springdoc:
   api-docs:
