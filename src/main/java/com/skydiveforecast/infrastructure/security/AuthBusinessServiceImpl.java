@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.security;
 
-import com.skydiveforecast.infrastructure.user.UserRepository;
+import com.skydiveforecast.infrastructure.adapter.out.persistance.UserRepository;
 import com.skydiveforecast.infrastructure.security.dto.AuthenticationRequest;
 import com.skydiveforecast.infrastructure.security.dto.AuthenticationResponse;
 import lombok.RequiredArgsConstructor;
