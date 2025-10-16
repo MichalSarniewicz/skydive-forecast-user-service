@@ -3,13 +3,16 @@ package com.skydiveforecast.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
-@Table(name = "USERS", schema = "skydive_forecast_user")
+@Table(name = "users", schema = "skydive_forecast_user")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = "roles")
 public class UserEntity {
 
     @Id
@@ -33,4 +36,7 @@ public class UserEntity {
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserRoleEntity> roles = new HashSet<>();
 }
