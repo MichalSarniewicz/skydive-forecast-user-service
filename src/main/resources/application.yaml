@@ -17,10 +17,10 @@ spring:
 
 springdoc:
   api-docs:
-    path: /v3/api-docs
+    path: /v3/api-docs/users
   swagger-ui:
     path: /swagger-ui.html
-    url: /v3/api-docs.yaml
+    url: /v3/api-docs/users.yaml
 
 jwt:
   expiration: 3600000         # 1 hour (ms)
