@@ -1,5 +1,6 @@
-package com.skydiveforecast.infrastructure.security;
+package com.skydiveforecast.infrastructure.adapter.in.web;
 
+import com.skydiveforecast.infrastructure.security.AuthBusinessService;
 import com.skydiveforecast.infrastructure.security.dto.AuthenticationRequest;
 import com.skydiveforecast.infrastructure.security.dto.AuthenticationResponse;
 import com.skydiveforecast.infrastructure.security.dto.RefreshTokenRequest;

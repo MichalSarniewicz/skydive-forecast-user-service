@@ -1,9 +1,9 @@
-package com.skydiveforecast.domain.service;
+package com.skydiveforecast.application;
 
 import com.skydiveforecast.domain.model.RoleEntity;
 import com.skydiveforecast.domain.model.UserEntity;
 import com.skydiveforecast.domain.model.UserRoleEntity;
-import com.skydiveforecast.domain.model.mapper.UserRoleMapper;
+import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UserRoleMapper;
 import com.skydiveforecast.domain.port.in.AssignRoleToUserUseCase;
 import com.skydiveforecast.domain.port.in.GetAllUserRolesUseCase;
 import com.skydiveforecast.domain.port.in.GetUserRolesUseCase;

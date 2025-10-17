@@ -1,4 +1,4 @@
-package com.skydiveforecast.domain.model.mapper;
+package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
 import com.skydiveforecast.domain.model.UserEntity;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UpdateUserDto;

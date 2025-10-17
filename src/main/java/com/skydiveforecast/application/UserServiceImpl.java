@@ -1,10 +1,10 @@
-package com.skydiveforecast.domain.service;
+package com.skydiveforecast.application;
 
 import com.skydiveforecast.domain.exception.ValidationException;
 import com.skydiveforecast.domain.model.UserEntity;
-import com.skydiveforecast.domain.model.mapper.CreateUserMapper;
-import com.skydiveforecast.domain.model.mapper.UpdateUserMapper;
-import com.skydiveforecast.domain.model.mapper.UserMapper;
+import com.skydiveforecast.infrastructure.adapter.in.web.mapper.CreateUserMapper;
+import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UpdateUserMapper;
+import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UserMapper;
 import com.skydiveforecast.domain.port.in.*;
 import com.skydiveforecast.domain.service.validation.PasswordValidatorService;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
