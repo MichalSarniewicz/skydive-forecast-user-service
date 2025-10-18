@@ -14,22 +14,26 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = "userRoles")
-@ToString(exclude = "userRoles")
+@EqualsAndHashCode(exclude = {"userRoles", "rolePermissions"})
+@ToString(exclude = {"userRoles", "rolePermissions"})
 public class RoleEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(name = "name", nullable = false, unique = true)
-	private String name;
+    @Column(name = "name", nullable = false, unique = true)
+    private String name;
 
-	@OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-	private Set<UserRoleEntity> userRoles = new HashSet<>();
+    private Set<UserRoleEntity> userRoles = new HashSet<>();
 
-	@Column(name = "created_at", nullable = false, updatable = false)
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<RolePermissionEntity> rolePermissions = new HashSet<>();
+
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at")
@@ -45,3 +49,4 @@ public class RoleEntity {
         updatedAt = OffsetDateTime.now();
     }
 }
+
