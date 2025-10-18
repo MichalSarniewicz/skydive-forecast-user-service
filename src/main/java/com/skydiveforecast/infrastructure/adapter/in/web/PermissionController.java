@@ -18,10 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin/permissions")
+@RequestMapping("/api/users/permissions")
 @RequiredArgsConstructor
 @Tag(name = "Permissions", description = "Endpoints for managing permissions")
-public class AdminPermissionController {
+public class PermissionController {
 
     private final GetAllPermissionsUseCase getAllPermissionsUseCase;
     private final CreatePermissionUseCase createPermissionUseCase;

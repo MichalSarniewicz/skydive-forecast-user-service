@@ -7,6 +7,7 @@ import com.skydiveforecast.domain.port.in.RemoveRoleFromUserUseCase;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateUserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRolesDto;
+import com.skydiveforecast.infrastructure.security.PermissionSecurity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,6 +27,7 @@ public class UserRoleController {
     private final RemoveRoleFromUserUseCase removeRoleFromUserUseCase;
 
     @GetMapping
+    @PermissionSecurity(permission = "USER_ROLE_VIEW_ALL")
     @Operation(summary = "Get all user-role assignments",
             description = "Fetch a list of all user-role assignments in the system")
     public ResponseEntity<UserRolesDto> getAllUserRoles() {
@@ -33,6 +35,7 @@ public class UserRoleController {
     }
 
     @GetMapping("/user/{user-id}")
+    @PermissionSecurity(permission = "USER_ROLE_VIEW")
     @Operation(summary = "Get roles for user",
             description = "Fetch all roles assigned to a specific user")
     public ResponseEntity<UserRolesDto> getUserRoles(@PathVariable("user-id") Long userId) {
@@ -40,6 +43,7 @@ public class UserRoleController {
     }
 
     @PostMapping
+    @PermissionSecurity(permission = "USER_ROLE_ASSIGN")
     @Operation(summary = "Assign role to user",
             description = "Assign a role to a specific user")
     public ResponseEntity<UserRoleDto> assignRoleToUser(@Valid @RequestBody CreateUserRoleDto createUserRoleDto) {
@@ -47,6 +51,7 @@ public class UserRoleController {
     }
 
     @DeleteMapping("/user/{user-id}/role/{role-id}")
+    @PermissionSecurity(permission = "USER_ROLE_REMOVE")
     @Operation(summary = "Remove specific role from user",
             description = "Remove a specific role from a user")
     public ResponseEntity<Void> removeRoleFromUser(@PathVariable("user-id") Long userId, @PathVariable("role-id") Long roleId) {

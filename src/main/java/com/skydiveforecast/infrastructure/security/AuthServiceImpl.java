@@ -78,6 +78,15 @@ public class AuthServiceImpl implements AuthService {
         return claimsResolver.apply(claims);
     }
 
+    @Override
+    public Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserPrincipal) {
+            return ((CustomUserPrincipal) authentication.getPrincipal()).getUserId();
+        }
+        return null;
+    }
+
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey())
