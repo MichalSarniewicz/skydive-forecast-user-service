@@ -1,4 +1,4 @@
-name: Docker Build
+name: Docker Build & Push
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
 
 jobs:
   docker:
+    name: Build & Push Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
