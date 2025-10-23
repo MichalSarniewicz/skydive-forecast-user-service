@@ -1,8 +1,10 @@
 package com.skydiveforecast.infrastructure.security;
 
+import com.skydiveforecast.domain.port.in.GetPermissionCodesByUserIdUseCase;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     @Value("${jwt.secret}")
@@ -26,6 +29,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Value("${jwt.refresh-expiration:604800000}")
     private long refreshExpiration;
+
+    private final GetPermissionCodesByUserIdUseCase getPermissionCodesByUserIdUseCase;
 
     private Key getSigningKey() {
         byte[] keyBytes = secretKey.getBytes();
@@ -46,10 +51,26 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+
+        // Add roles to the token
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
+
         claims.put("roles", roles);
+
+        // Add permissions to the token
+        Long userId = null;
+        if (userDetails instanceof CustomUserPrincipal) {
+            userId = ((CustomUserPrincipal) userDetails).getUserId();
+        }
+
+        if (userId != null) {
+            Set<String> permissions = getPermissionCodesByUserIdUseCase.getPermissionCodesByUserId(userId);
+            claims.put("permissions", permissions);
+            claims.put("userId", userId);
+        }
+
         return createToken(claims, userDetails.getUsername(), jwtExpiration);
     }
 
