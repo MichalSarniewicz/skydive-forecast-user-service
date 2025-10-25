@@ -14,6 +14,7 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.xml
     database-change-log-table: skydive-forecast.DATABASECHANGELOG
     database-change-log-lock-table: skydive-forecast.DATABASECHANGELOGLOCK
+    contexts: default
   data:
     redis:
       host: localhost
