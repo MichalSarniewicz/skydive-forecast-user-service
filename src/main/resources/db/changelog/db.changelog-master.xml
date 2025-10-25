@@ -7,5 +7,7 @@
 
     <include file="/db/changelog/2025-10-15-create-initial-schema.sql"/>
     <include file="/db/changelog/2025-10-18-add-permissions-schema.sql"/>
+    <include file="/db/changelog/2025-10-24-insert-permissions-codes.sql"/>
+    <include file="/db/changelog/2025-10-25-insert-role-permissions-mappings.sql"/>
 
 </databaseChangeLog>
