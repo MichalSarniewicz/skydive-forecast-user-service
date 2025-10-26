@@ -1,5 +1,13 @@
 # Skydive Forecast - User Service
 
+[![CI Pipeline](https://github.com/MichalSarniewicz/skydive-forecast-user-service/actions/workflows/ci.yml/badge.svg)](https://github.com/MichalSarniewicz/skydive-forecast-user-service/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/MichalSarniewicz/skydive-forecast-user-service/branch/master/graph/badge.svg)](https://codecov.io/gh/MichalSarniewicz/skydive-forecast-user-service)
+[![Java](https://img.shields.io/badge/Java-21-green?logo=openjdk)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)](https://www.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+
 User management and authentication microservice for the Skydive Forecast system, built with Spring Boot and hexagonal architecture.
 
 ## Overview
