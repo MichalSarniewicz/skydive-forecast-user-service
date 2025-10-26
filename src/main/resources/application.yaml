@@ -7,6 +7,7 @@ spring:
   application:
     name: skydive-forecast-user-service
   jpa:
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
@@ -22,6 +23,8 @@ spring:
       password: pass
       database: 0
       timeout: 2000ms
+  cache:
+    type: redis
 
 springdoc:
   api-docs:

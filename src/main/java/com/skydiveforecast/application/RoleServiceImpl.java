@@ -10,10 +10,14 @@ import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolesDto;
 import com.skydiveforecast.infrastructure.adapter.out.persistance.RoleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+
+import static com.skydiveforecast.infrastructure.config.CacheConfig.ROLES_CACHE;
 
 @Service
 @RequiredArgsConstructor
@@ -24,12 +28,14 @@ public class RoleServiceImpl implements GetAllRolesUseCase, AddRoleUseCase, Dele
     private static final String ADMIN_ROLE = "ADMIN";
 
     @Override
+    @Cacheable(value = ROLES_CACHE, key = "'all'")
     public RolesDto getAllRoles() {
         List<RoleEntity> entities = roleRepository.findAll();
         return new RolesDto(roleMapper.toDtoList(entities));
     }
 
     @Override
+    @CacheEvict(value = ROLES_CACHE, allEntries = true)
     public RoleDto addRole(String roleName) {
         RoleEntity roleEntity = RoleEntity.builder()
                 .name(roleName)
@@ -41,6 +47,7 @@ public class RoleServiceImpl implements GetAllRolesUseCase, AddRoleUseCase, Dele
     }
 
     @Override
+    @CacheEvict(value = ROLES_CACHE, allEntries = true)
     public void deleteRole(Long roleId) {
         RoleEntity roleEntity = roleRepository.findById(roleId).orElseThrow(() -> new EntityNotFoundException("Role with ID " + roleId + " does not exist"));
 

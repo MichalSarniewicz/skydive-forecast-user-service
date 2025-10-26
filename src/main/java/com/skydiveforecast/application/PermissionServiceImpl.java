@@ -10,11 +10,16 @@ import com.skydiveforecast.infrastructure.adapter.out.persistance.PermissionRepo
 import com.skydiveforecast.infrastructure.adapter.out.persistance.RolePermissionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.skydiveforecast.infrastructure.config.CacheConfig.PERMISSIONS_CACHE;
+import static com.skydiveforecast.infrastructure.config.CacheConfig.PERMISSION_CODES_CACHE;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +30,7 @@ public class PermissionServiceImpl implements GetAllPermissionsUseCase, CreatePe
     private final RolePermissionRepository rolePermissionRepository;
 
     @Override
+    @Cacheable(value = PERMISSIONS_CACHE, key = "'all'")
     public PermissionsDto getAllPermissions() {
         List<PermissionDto> permissions = permissionRepository.findAll().stream()
                 .map(this::mapToDto)
@@ -34,6 +40,7 @@ public class PermissionServiceImpl implements GetAllPermissionsUseCase, CreatePe
     }
 
     @Override
+    @CacheEvict(value = PERMISSIONS_CACHE, allEntries = true)
     public PermissionDto createPermission(CreatePermissionDto createPermissionDto) {
         PermissionEntity permission = new PermissionEntity();
         permission.setCode(createPermissionDto.getCode());
@@ -44,6 +51,7 @@ public class PermissionServiceImpl implements GetAllPermissionsUseCase, CreatePe
     }
 
     @Override
+    @CacheEvict(value = PERMISSIONS_CACHE, allEntries = true)
     public PermissionDto updatePermission(Long id, UpdatePermissionDto updatePermissionDto) {
         PermissionEntity permission = permissionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Permission not found with id: " + id));
@@ -56,6 +64,7 @@ public class PermissionServiceImpl implements GetAllPermissionsUseCase, CreatePe
     }
 
     @Override
+    @CacheEvict(value = PERMISSIONS_CACHE, allEntries = true)
     public void deletePermission(Long id) {
         permissionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Permission not found with ID: " + id));
@@ -71,6 +80,7 @@ public class PermissionServiceImpl implements GetAllPermissionsUseCase, CreatePe
     }
 
     @Override
+    @Cacheable(value = PERMISSION_CODES_CACHE, key = "'user:' + #userId")
     public Set<String> getPermissionCodesByUserId(Long userId) {
         return rolePermissionRepository.findPermissionCodesByUserId(userId);
     }

@@ -11,12 +11,16 @@ import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
 import com.skydiveforecast.infrastructure.adapter.out.persistance.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.skydiveforecast.infrastructure.config.CacheConfig.USERS_CACHE;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,7 @@ public class UserServiceImpl implements UpdateUserStatusUseCase, FindUserByIdUse
     private final PasswordValidatorService passwordValidator;
 
     @Override
+    @CacheEvict(value = USERS_CACHE, allEntries = true)
     public UpdateUserResponse updateUser(Long userId, UpdateUserDto updateUserDto) {
         UserEntity user = findUserById(userId);
         updateUserMapper.updateEntityFromDto(updateUserDto, user);
@@ -39,6 +44,7 @@ public class UserServiceImpl implements UpdateUserStatusUseCase, FindUserByIdUse
     }
 
     @Override
+    @CacheEvict(value = USERS_CACHE, allEntries = true)
     public UserStatusUpdateResponse updateUserStatus(Long userId, UserStatusUpdateDto statusUpdateDto) {
         UserEntity user = findUserById(userId);
 
@@ -59,6 +65,7 @@ public class UserServiceImpl implements UpdateUserStatusUseCase, FindUserByIdUse
     }
 
     @Override
+    @CacheEvict(value = USERS_CACHE, allEntries = true)
     public void changePassword(Long userId, String currentPassword, String newPassword) {
         UserEntity currentUser = findUserById(userId);
 
@@ -86,12 +93,14 @@ public class UserServiceImpl implements UpdateUserStatusUseCase, FindUserByIdUse
     }
 
     @Override
+    @Cacheable(value = USERS_CACHE, key = "'all'")
     public UsersDto getAllUsers() {
         List<UserEntity> entities = userRepository.findAll();
         return new UsersDto(userMapper.toDtoList(entities));
     }
 
     @Override
+    @CacheEvict(value = USERS_CACHE, allEntries = true)
     public UserDto createUser(CreateUserDto createUserDto) {
         Map<String, String> errors = new HashMap<>();
 

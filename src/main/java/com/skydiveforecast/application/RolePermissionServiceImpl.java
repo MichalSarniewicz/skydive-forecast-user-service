@@ -13,12 +13,17 @@ import com.skydiveforecast.infrastructure.adapter.out.persistance.RolePermission
 import com.skydiveforecast.infrastructure.adapter.out.persistance.RoleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.skydiveforecast.infrastructure.config.CacheConfig.PERMISSION_CODES_CACHE;
+import static com.skydiveforecast.infrastructure.config.CacheConfig.ROLE_PERMISSIONS_CACHE;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +45,7 @@ public class RolePermissionServiceImpl implements
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = ROLE_PERMISSIONS_CACHE, key = "'all'")
     public RolePermissionsDto getAllRolePermissions() {
         List<RolePermissionEntity> entities = rolePermissionRepository.findAll();
         List<RolePermissionDto> dtoList = entities.stream()
@@ -53,6 +59,7 @@ public class RolePermissionServiceImpl implements
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = ROLE_PERMISSIONS_CACHE, key = "'role:' + #roleId")
     public RolePermissionsDto getRolePermissionsByRoleId(Long roleId) {
         List<RolePermissionEntity> entities = rolePermissionRepository.findByRoleId(roleId);
         List<RolePermissionDto> dtoList = entities.stream()
@@ -65,6 +72,7 @@ public class RolePermissionServiceImpl implements
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = ROLE_PERMISSIONS_CACHE, key = "'permission:' + #permissionId")
     public RolePermissionsDto getRolePermissionsByPermissionId(Long permissionId) {
         List<RolePermissionEntity> entities = rolePermissionRepository.findByPermissionId(permissionId);
         List<RolePermissionDto> dtoList = entities.stream()
@@ -76,6 +84,7 @@ public class RolePermissionServiceImpl implements
     }
 
     @Override
+    @CacheEvict(value = {ROLE_PERMISSIONS_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public RolePermissionDto createRolePermission(CreateRolePermissionDto createRolePermissionDto) {
         // Check if a relationship already exists
         if (rolePermissionRepository.existsByRoleIdAndPermissionId(
@@ -99,6 +108,7 @@ public class RolePermissionServiceImpl implements
     }
 
     @Override
+    @CacheEvict(value = {ROLE_PERMISSIONS_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public List<RolePermissionDto> assignPermissionsToRole(AssignPermissionsToRoleDto assignPermissionsToRoleDto) {
         RoleEntity role = roleRepository.findById(assignPermissionsToRoleDto.getRoleId())
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
@@ -128,6 +138,7 @@ public class RolePermissionServiceImpl implements
 
     @Override
     @Transactional
+    @CacheEvict(value = {ROLE_PERMISSIONS_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public void deleteRolePermission(Long id) {
         RolePermissionEntity rolePermission = rolePermissionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Role-Permission not found with ID: " + id));
@@ -135,11 +146,13 @@ public class RolePermissionServiceImpl implements
     }
 
     @Override
+    @Cacheable(value = PERMISSION_CODES_CACHE, key = "'role:' + #roleId")
     public Set<String> getPermissionCodesByRoleId(Long roleId) {
         return rolePermissionRepository.findPermissionCodesByRoleId(roleId);
     }
 
     @Override
+    @CacheEvict(value = {ROLE_PERMISSIONS_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public void deleteAllRolePermissionsByRoleId(Long roleId) {
         List<RolePermissionEntity> entities = rolePermissionRepository.findByRoleId(roleId);
         if (entities.isEmpty()) {
@@ -154,6 +167,7 @@ public class RolePermissionServiceImpl implements
     }
 
     @Override
+    @CacheEvict(value = {ROLE_PERMISSIONS_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public void deleteAllRolePermissionsByPermissionId(Long permissionId) {
         List<RolePermissionEntity> entities = rolePermissionRepository.findByPermissionId(permissionId);
         if (entities.isEmpty()) {

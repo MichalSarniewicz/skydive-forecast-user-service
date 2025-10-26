@@ -10,5 +10,6 @@ public interface CreateUserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     UserEntity toEntity(CreateUserDto dto);
 }

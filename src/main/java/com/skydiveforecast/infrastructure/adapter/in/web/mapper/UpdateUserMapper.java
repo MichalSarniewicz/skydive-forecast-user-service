@@ -13,5 +13,6 @@ public interface UpdateUserMapper {
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
     @Mapping(target = "active", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     void updateEntityFromDto(UpdateUserDto dto, @MappingTarget UserEntity entity);
 }

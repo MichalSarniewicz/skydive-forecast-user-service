@@ -16,10 +16,15 @@ import com.skydiveforecast.infrastructure.adapter.out.persistance.UserRepository
 import com.skydiveforecast.infrastructure.adapter.out.persistance.UserRoleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.skydiveforecast.infrastructure.config.CacheConfig.PERMISSION_CODES_CACHE;
+import static com.skydiveforecast.infrastructure.config.CacheConfig.USER_ROLES_CACHE;
 
 @Service
 @RequiredArgsConstructor
@@ -32,12 +37,14 @@ public class UserRoleServiceImpl implements GetAllUserRolesUseCase, GetUserRoles
     private final RoleRepository roleRepository;
 
     @Override
+    @Cacheable(value = USER_ROLES_CACHE, key = "'all'")
     public UserRolesDto getAllUserRoles() {
         List<UserRoleEntity> entities = userRoleRepository.findAll();
         return new UserRolesDto(userRoleMapper.toDtoList(entities));
     }
 
     @Override
+    @Cacheable(value = USER_ROLES_CACHE, key = "'user:' + #userId")
     public UserRolesDto getUserRoles(Long userId) {
         List<UserRoleEntity> userRoleEntities = userRoleRepository.findByUserId(userId);
         return new UserRolesDto(userRoleMapper.toDtoList(userRoleEntities));
@@ -45,6 +52,7 @@ public class UserRoleServiceImpl implements GetAllUserRolesUseCase, GetUserRoles
 
     @Override
     @Transactional
+    @CacheEvict(value = {USER_ROLES_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public UserRoleDto assignRoleToUser(CreateUserRoleDto createUserRoleDto) {
         Long userId = createUserRoleDto.getUserId();
         Long roleId = createUserRoleDto.getRoleId();
@@ -70,6 +78,7 @@ public class UserRoleServiceImpl implements GetAllUserRolesUseCase, GetUserRoles
 
     @Override
     @Transactional
+    @CacheEvict(value = {USER_ROLES_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public void removeRoleFromUser(Long userId, Long roleId) {
         boolean roleAssigned = userRoleRepository.findByUserId(userId).stream()
                 .anyMatch(userRole -> userRole.getRole().getId().equals(roleId));
