@@ -37,6 +37,7 @@ This service handles user authentication, authorization, role-based access contr
 - **MapStruct**: Object mapping
 - **SpringDoc OpenAPI**: 2.8.13
 - **Testcontainers**: Integration testing
+- **Monitoring**: Actuator, Prometheus, Grafana, Loki, Zipkin
 - **Build Tool**: Maven
 
 ## Architecture
@@ -212,6 +213,35 @@ http://localhost:8080/api/users/**
 ```
 
 The gateway routes requests to this service running on port 8081.
+
+## Monitoring
+
+The service includes comprehensive monitoring capabilities:
+
+### Metrics (Prometheus)
+
+- **Endpoint**: `http://localhost:8081/actuator/prometheus`
+- **Metrics**: JVM, HTTP requests, database connections, Kafka consumers, Redis cache
+
+### Health Checks
+
+- **Endpoint**: `http://localhost:8081/actuator/health`
+
+### Logs (Loki)
+
+Application logs are automatically sent to Loki for centralized log aggregation.
+
+### Distributed Tracing (Zipkin)
+
+- **Endpoint**: `http://localhost:9411`
+- **Traces**: Request flows across services with timing information
+- **Sampling**: 100% of requests traced (configurable)
+
+### Grafana Dashboards
+
+Access Grafana at `http://localhost:3000` (admin/admin)
+
+Recommended dashboard: Import ID **11378** (JVM Micrometer)
 
 ## License
 
