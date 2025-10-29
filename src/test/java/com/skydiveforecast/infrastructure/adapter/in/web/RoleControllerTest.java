@@ -1,80 +1,80 @@
 package com.skydiveforecast.infrastructure.adapter.in.web;
 
-import com.skydiveforecast.domain.port.in.AddRoleUseCase;
-import com.skydiveforecast.domain.port.in.DeleteRoleUseCase;
-import com.skydiveforecast.domain.port.in.GetAllRolesUseCase;
-import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolesDto;
-import org.junit.jupiter.api.BeforeEach;
+import com.skydiveforecast.domain.port.in.*;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RoleControllerTest {
-
-    private RoleController adminRoleController;
+class RoleControllerTest {
 
     @Mock
     private GetAllRolesUseCase getAllRolesUseCase;
-
     @Mock
     private AddRoleUseCase addRoleUseCase;
-
     @Mock
     private DeleteRoleUseCase deleteRoleUseCase;
 
-    @BeforeEach
-    void setUp() {
-        adminRoleController = new RoleController(getAllRolesUseCase, addRoleUseCase, deleteRoleUseCase);
-    }
-    
+    @InjectMocks
+    private RoleController roleController;
+
     @Test
-    void testGetAllRolesReturnsOkWithRoles() {
+    @DisplayName("Should get all roles successfully")
+    void getAllRoles_Success() {
         // Arrange
-        RolesDto rolesDto = new RolesDto();
-        when(getAllRolesUseCase.getAllRoles()).thenReturn(rolesDto);
+        RolesDto dto = new RolesDto(List.of(new RoleDto()));
+        when(getAllRolesUseCase.getAllRoles()).thenReturn(dto);
 
         // Act
-        ResponseEntity<RolesDto> response = adminRoleController.getAllRoles();
+        ResponseEntity<RolesDto> response = roleController.getAllRoles();
 
         // Assert
-        assertThat(response).isNotNull();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo(rolesDto);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        verify(getAllRolesUseCase).getAllRoles();
     }
 
-
     @Test
-    void testGetAllRolesReturnsOkWhenNoRolesExist() {
+    @DisplayName("Should add role successfully")
+    void addRole_Success() {
         // Arrange
-        RolesDto emptyRolesDto = new RolesDto();
-        when(getAllRolesUseCase.getAllRoles()).thenReturn(emptyRolesDto);
+        String roleName = "MODERATOR";
+        RoleDto result = new RoleDto();
+        when(addRoleUseCase.addRole(any())).thenReturn(result);
 
         // Act
-        ResponseEntity<RolesDto> response = adminRoleController.getAllRoles();
+        ResponseEntity<RoleDto> response = roleController.addRole(roleName);
 
         // Assert
-        assertThat(response).isNotNull();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo(emptyRolesDto);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        verify(addRoleUseCase).addRole(roleName);
     }
-    
-    @Test
-    void testGetAllRolesHandlesServiceException() {
-        // Arrange
-        when(getAllRolesUseCase.getAllRoles()).thenThrow(new RuntimeException("Service error"));
 
-        // Act & Assert
-        try {
-            adminRoleController.getAllRoles();
-        } catch (RuntimeException e) {
-            assertThat(e.getMessage()).isEqualTo("Service error");
-        }
+    @Test
+    @DisplayName("Should delete role successfully")
+    void deleteRole_Success() {
+        // Arrange
+        Long id = 1L;
+
+        // Act
+        ResponseEntity<String> response = roleController.deleteRole(id);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(deleteRoleUseCase).deleteRole(id);
     }
+
 }

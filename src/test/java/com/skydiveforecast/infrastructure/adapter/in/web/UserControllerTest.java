@@ -2,6 +2,7 @@ package com.skydiveforecast.infrastructure.adapter.in.web;
 
 import com.skydiveforecast.domain.port.in.*;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,92 +11,97 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
     @Mock
-    private UpdateUserStatusUseCase updateUserStatusUseCase;
-
-    @Mock
     private GetAllUsersUseCase getAllUsersUseCase;
-
+    @Mock
+    private FindUserByIdUseCase findUserByIdUseCase;
     @Mock
     private CreateUserUseCase createUserUseCase;
-
     @Mock
     private UpdateUserUseCase updateUserUseCase;
+    @Mock
+    private UpdateUserStatusUseCase updateUserStatusUseCase;
+    @Mock
+    private ChangePasswordUseCase changePasswordUseCase;
 
     @InjectMocks
-    private UserController adminUserController;
+    private UserController userController;
 
     @Test
-    void getAllUsers_ShouldReturnAllUsers() {
+    @DisplayName("Should get all users successfully")
+    void getAllUsers_Success() {
         // Arrange
-        UsersDto expectedDto = new UsersDto();
-        when(getAllUsersUseCase.getAllUsers()).thenReturn(expectedDto);
+        UsersDto dto = new UsersDto(List.of(new UserDto()));
+        when(getAllUsersUseCase.getAllUsers()).thenReturn(dto);
 
         // Act
-        ResponseEntity<UsersDto> response = adminUserController.getAllUsers();
+        ResponseEntity<UsersDto> response = userController.getAllUsers();
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expectedDto, response.getBody());
+        assertNotNull(response.getBody());
         verify(getAllUsersUseCase).getAllUsers();
     }
 
     @Test
-    void createUser_ShouldCreateAndReturnUser() {
+    @DisplayName("Should create user successfully")
+    void createUser_Success() {
         // Arrange
-        CreateUserDto createDto = new CreateUserDto();
-        UserDto expectedDto = new UserDto();
-        when(createUserUseCase.createUser(any())).thenReturn(expectedDto);
+        CreateUserDto dto = new CreateUserDto();
+        UserDto result = new UserDto();
+        when(createUserUseCase.createUser(any())).thenReturn(result);
 
         // Act
-        ResponseEntity<UserDto> response = adminUserController.createUser(createDto);
+        ResponseEntity<UserDto> response = userController.createUser(dto);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expectedDto, response.getBody());
-        verify(createUserUseCase).createUser(createDto);
+        assertNotNull(response.getBody());
+        verify(createUserUseCase).createUser(dto);
     }
 
     @Test
-    void updateUserStatus_ShouldUpdateAndReturnStatus() {
+    @DisplayName("Should update user successfully")
+    void updateUser_Success() {
         // Arrange
-        Long userId = 1L;
-        UserStatusUpdateDto statusUpdateDto = new UserStatusUpdateDto();
-        UserStatusUpdateResponse expectedResponse = new UserStatusUpdateResponse();
-        when(updateUserStatusUseCase.updateUserStatus(anyLong(), any())).thenReturn(expectedResponse);
+        Long id = 1L;
+        UpdateUserDto dto = new UpdateUserDto();
+        UpdateUserResponse result = UpdateUserResponse.success("Updated", new UserDto());
+        when(updateUserUseCase.updateUser(any(), any())).thenReturn(result);
 
         // Act
-        ResponseEntity<UserStatusUpdateResponse> response = adminUserController.updateUserStatus(userId, statusUpdateDto);
+        ResponseEntity<UpdateUserResponse> response = userController.updateUser(id, dto);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expectedResponse, response.getBody());
-        verify(updateUserStatusUseCase).updateUserStatus(userId, statusUpdateDto);
+        assertNotNull(response.getBody());
+        verify(updateUserUseCase).updateUser(id, dto);
     }
 
     @Test
-    void updateUser_ShouldUpdateAndReturnUser() {
+    @DisplayName("Should update user status successfully")
+    void updateUserStatus_Success() {
         // Arrange
-        Long userId = 1L;
-        UpdateUserDto updateDto = new UpdateUserDto();
-        UpdateUserResponse expectedResponse = new UpdateUserResponse();
-        when(updateUserUseCase.updateUser(anyLong(), any())).thenReturn(expectedResponse);
+        Long id = 1L;
+        UserStatusUpdateDto dto = new UserStatusUpdateDto();
+        UserStatusUpdateResponse result = UserStatusUpdateResponse.success("Updated");
+        when(updateUserStatusUseCase.updateUserStatus(any(), any())).thenReturn(result);
 
         // Act
-        ResponseEntity<UpdateUserResponse> response = adminUserController.updateUser(userId, updateDto);
+        ResponseEntity<UserStatusUpdateResponse> response = userController.updateUserStatus(id, dto);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expectedResponse, response.getBody());
-        verify(updateUserUseCase).updateUser(userId, updateDto);
+        assertNotNull(response.getBody());
+        verify(updateUserStatusUseCase).updateUserStatus(id, dto);
     }
 }

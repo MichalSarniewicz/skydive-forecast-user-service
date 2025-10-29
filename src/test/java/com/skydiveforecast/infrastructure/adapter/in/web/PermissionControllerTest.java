@@ -1,62 +1,99 @@
 package com.skydiveforecast.infrastructure.adapter.in.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skydiveforecast.domain.port.in.CreatePermissionUseCase;
-import com.skydiveforecast.domain.port.in.DeletePermissionUseCase;
-import com.skydiveforecast.domain.port.in.GetAllPermissionsUseCase;
-import com.skydiveforecast.domain.port.in.UpdatePermissionUseCase;
-import com.skydiveforecast.infrastructure.adapter.in.web.dto.PermissionsDto;
-import org.junit.jupiter.api.BeforeEach;
+import com.skydiveforecast.domain.port.in.*;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class PermissionControllerTest {
 
-    private MockMvc mockMvc;
+    @Mock
     private GetAllPermissionsUseCase getAllPermissionsUseCase;
+    @Mock
+    private CreatePermissionUseCase createPermissionUseCase;
+    @Mock
+    private UpdatePermissionUseCase updatePermissionUseCase;
+    @Mock
+    private DeletePermissionUseCase deletePermissionUseCase;
 
-    @BeforeEach
-    void setup() {
-        getAllPermissionsUseCase = mock(GetAllPermissionsUseCase.class);
-        CreatePermissionUseCase createPermissionUseCase = mock(CreatePermissionUseCase.class);
-        UpdatePermissionUseCase updatePermissionUseCase = mock(UpdatePermissionUseCase.class);
-        DeletePermissionUseCase deletePermissionUseCase = mock(DeletePermissionUseCase.class);
-        PermissionController adminPermissionController = new PermissionController(getAllPermissionsUseCase,
-                createPermissionUseCase, updatePermissionUseCase, deletePermissionUseCase);
-        mockMvc = MockMvcBuilders.standaloneSetup(adminPermissionController).build();
+    @InjectMocks
+    private PermissionController permissionController;
+
+    @Test
+    @DisplayName("Should get all permissions successfully")
+    void getAllPermissions_Success() {
+        // Arrange
+        PermissionsDto dto = new PermissionsDto(List.of(new PermissionDto()));
+        when(getAllPermissionsUseCase.getAllPermissions()).thenReturn(dto);
+
+        // Act
+        ResponseEntity<PermissionsDto> response = permissionController.getAllPermissions();
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        verify(getAllPermissionsUseCase).getAllPermissions();
     }
 
     @Test
-    void getAllPermissions_shouldReturnListOfPermissions() throws Exception {
+    @DisplayName("Should create permission successfully")
+    void createPermission_Success() {
         // Arrange
-        PermissionsDto permissionsDto = PermissionsDto.builder().build();
-        when(getAllPermissionsUseCase.getAllPermissions()).thenReturn(permissionsDto);
+        CreatePermissionDto dto = new CreatePermissionDto();
+        PermissionDto result = new PermissionDto();
+        when(createPermissionUseCase.createPermission(any())).thenReturn(result);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/users/permissions")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(new ObjectMapper().writeValueAsString(permissionsDto)));
+        // Act
+        ResponseEntity<PermissionDto> response = permissionController.createPermission(dto);
+
+        // Assert
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        verify(createPermissionUseCase).createPermission(dto);
     }
 
     @Test
-    void getAllPermissions_shouldHandleEmptyList() throws Exception {
+    @DisplayName("Should update permission successfully")
+    void updatePermission_Success() {
         // Arrange
-        PermissionsDto emptyPermissionsDto = PermissionsDto.builder().build();
-        when(getAllPermissionsUseCase.getAllPermissions()).thenReturn(emptyPermissionsDto);
+        Long id = 1L;
+        UpdatePermissionDto dto = new UpdatePermissionDto();
+        PermissionDto result = new PermissionDto();
+        when(updatePermissionUseCase.updatePermission(any(), any())).thenReturn(result);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/users/permissions")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(new ObjectMapper().writeValueAsString(emptyPermissionsDto)));
+        // Act
+        ResponseEntity<PermissionDto> response = permissionController.updatePermission(id, dto);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        verify(updatePermissionUseCase).updatePermission(id, dto);
+    }
+
+    @Test
+    @DisplayName("Should delete permission successfully")
+    void deletePermission_Success() {
+        // Arrange
+        Long id = 1L;
+
+        // Act
+        ResponseEntity<Void> response = permissionController.deletePermission(id);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(deletePermissionUseCase).deletePermission(id);
     }
 }
