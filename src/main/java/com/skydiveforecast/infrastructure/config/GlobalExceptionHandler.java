@@ -1,5 +1,6 @@
 package com.skydiveforecast.infrastructure.config;
 
+import com.skydiveforecast.domain.exception.BusinessRuleException;
 import com.skydiveforecast.domain.exception.InvalidCredentialsException;
 import com.skydiveforecast.domain.exception.InvalidTokenException;
 import com.skydiveforecast.domain.exception.ValidationException;
@@ -112,6 +113,23 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessRuleException(
+            BusinessRuleException ex, HttpServletRequest request) {
+
+        log.warn("Business rule violation on {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("BUSINESS_RULE_VIOLATION")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(IllegalStateException.class)
