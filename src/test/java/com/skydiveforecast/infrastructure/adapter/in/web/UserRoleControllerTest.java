@@ -1,7 +1,12 @@
 package com.skydiveforecast.infrastructure.adapter.in.web;
 
-import com.skydiveforecast.domain.port.in.*;
-import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
+import com.skydiveforecast.domain.port.in.AssignRoleToUserUseCase;
+import com.skydiveforecast.domain.port.in.GetAllUserRolesUseCase;
+import com.skydiveforecast.domain.port.in.GetUserRolesUseCase;
+import com.skydiveforecast.domain.port.in.RemoveRoleFromUserUseCase;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateUserRoleDto;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRoleDto;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRolesDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

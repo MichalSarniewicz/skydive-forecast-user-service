@@ -1,6 +1,8 @@
 package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
-import com.skydiveforecast.domain.model.*;
+import com.skydiveforecast.domain.model.RoleEntity;
+import com.skydiveforecast.domain.model.UserEntity;
+import com.skydiveforecast.domain.model.UserRoleEntity;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserDto;
 import org.mapstruct.Mapper;

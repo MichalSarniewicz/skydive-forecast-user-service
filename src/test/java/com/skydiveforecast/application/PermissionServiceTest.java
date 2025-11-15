@@ -2,12 +2,12 @@ package com.skydiveforecast.application;
 
 import com.skydiveforecast.application.service.PermissionService;
 import com.skydiveforecast.domain.model.PermissionEntity;
+import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
+import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreatePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.PermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.PermissionsDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UpdatePermissionDto;
-import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
-import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -2,10 +2,10 @@ package com.skydiveforecast.application;
 
 import com.skydiveforecast.application.service.RoleService;
 import com.skydiveforecast.domain.model.RoleEntity;
+import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolesDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.RoleMapper;
-import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

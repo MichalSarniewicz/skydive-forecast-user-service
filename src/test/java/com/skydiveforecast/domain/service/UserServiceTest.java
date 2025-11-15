@@ -1,7 +1,7 @@
 package com.skydiveforecast.domain.service;
 
 import com.skydiveforecast.application.service.UserService;
-import com.skydiveforecast.domain.model.*;
+import com.skydiveforecast.domain.model.UserEntity;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import com.skydiveforecast.domain.service.validation.PasswordValidatorService;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,10 @@
 package com.skydiveforecast.infrastructure.adapter.in.web;
 
 import com.skydiveforecast.domain.port.in.*;
-import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.AssignPermissionsToRoleDto;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateRolePermissionDto;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionDto;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionsDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

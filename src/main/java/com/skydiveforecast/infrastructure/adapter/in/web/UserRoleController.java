@@ -1,5 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.in.web;
 
+import com.skydiveforecast.domain.annotation.PermissionSecurity;
 import com.skydiveforecast.domain.port.in.AssignRoleToUserUseCase;
 import com.skydiveforecast.domain.port.in.GetAllUserRolesUseCase;
 import com.skydiveforecast.domain.port.in.GetUserRolesUseCase;
@@ -7,7 +8,6 @@ import com.skydiveforecast.domain.port.in.RemoveRoleFromUserUseCase;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateUserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRolesDto;
-import com.skydiveforecast.domain.annotation.PermissionSecurity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

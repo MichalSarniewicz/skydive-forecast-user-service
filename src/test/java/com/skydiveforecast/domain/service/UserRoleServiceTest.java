@@ -2,11 +2,15 @@ package com.skydiveforecast.domain.service;
 
 import com.skydiveforecast.application.service.RoleService;
 import com.skydiveforecast.application.service.UserRoleService;
-import com.skydiveforecast.domain.model.*;
+import com.skydiveforecast.domain.model.RoleEntity;
+import com.skydiveforecast.domain.model.UserEntity;
+import com.skydiveforecast.domain.model.UserRoleEntity;
 import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import com.skydiveforecast.domain.port.out.UserRoleRepositoryPort;
-import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateUserRoleDto;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.RoleDto;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolesDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.RoleMapper;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UserRoleMapper;
 import jakarta.persistence.EntityNotFoundException;

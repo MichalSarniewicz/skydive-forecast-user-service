@@ -1,7 +1,13 @@
 package com.skydiveforecast.infrastructure.adapter.in.web;
 
-import com.skydiveforecast.domain.port.in.*;
-import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
+import com.skydiveforecast.domain.port.in.CreatePermissionUseCase;
+import com.skydiveforecast.domain.port.in.DeletePermissionUseCase;
+import com.skydiveforecast.domain.port.in.GetAllPermissionsUseCase;
+import com.skydiveforecast.domain.port.in.UpdatePermissionUseCase;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreatePermissionDto;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.PermissionDto;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.PermissionsDto;
+import com.skydiveforecast.infrastructure.adapter.in.web.dto.UpdatePermissionDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +20,8 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PermissionControllerTest {
