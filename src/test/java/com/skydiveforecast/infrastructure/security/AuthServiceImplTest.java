@@ -68,7 +68,7 @@ class AuthServiceImplTest {
         // Arrange
         UserDetails userDetails = mock(UserDetails.class);
         when(userDetails.getUsername()).thenReturn("test@example.com");
-        when(userDetails.getAuthorities()).thenReturn((List)List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        when(userDetails.getAuthorities()).thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
         // Act
         String token = authService.generateToken(userDetails);

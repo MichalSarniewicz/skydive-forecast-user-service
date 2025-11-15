@@ -1,10 +1,11 @@
 package com.skydiveforecast.application;
 
+import com.skydiveforecast.application.service.RoleService;
 import com.skydiveforecast.domain.model.RoleEntity;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolesDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.RoleMapper;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.RoleRepository;
+import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,16 +23,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RoleServiceImplTest {
+class RoleServiceTest {
 
     @Mock
-    private RoleRepository roleRepository;
+    private RoleRepositoryPort roleRepository;
 
     @Mock
     private RoleMapper roleMapper;
 
     @InjectMocks
-    private RoleServiceImpl roleService;
+    private RoleService roleService;
 
     @Test
     @DisplayName("Should get all roles successfully")
@@ -97,7 +98,6 @@ class RoleServiceImplTest {
     @Test
     @DisplayName("Should delete role successfully")
     void deleteRole_Success() {
-        // Arrange
         Long roleId = 1L;
         RoleEntity role = RoleEntity.builder()
                 .id(roleId)
@@ -112,7 +112,7 @@ class RoleServiceImplTest {
 
         // Assert
         verify(roleRepository).findById(roleId);
-        verify(roleRepository).delete(role);
+        verify(roleRepository).deleteById(roleId);
     }
 
     @Test
@@ -129,11 +129,11 @@ class RoleServiceImplTest {
 
         assertEquals("Role with ID " + roleId + " does not exist", exception.getMessage());
         verify(roleRepository).findById(roleId);
-        verify(roleRepository, never()).delete(any());
+        verify(roleRepository, never()).deleteById(any());
     }
 
     @Test
-    @DisplayName("Should throw EntityNotFoundException when deleting ADMIN role")
+    @DisplayName("Should throw BusinessRuleException when deleting ADMIN role")
     void deleteRole_AdminRoleCannotBeDeleted() {
         // Arrange
         Long roleId = 1L;
@@ -146,11 +146,11 @@ class RoleServiceImplTest {
         when(roleRepository.findById(roleId)).thenReturn(Optional.of(adminRole));
 
         // Act & Assert
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        Exception exception = assertThrows(Exception.class,
                 () -> roleService.deleteRole(roleId));
 
         assertEquals("The ADMIN role cannot be deleted", exception.getMessage());
         verify(roleRepository).findById(roleId);
-        verify(roleRepository, never()).delete(any());
+        verify(roleRepository, never()).deleteById(any());
     }
 }

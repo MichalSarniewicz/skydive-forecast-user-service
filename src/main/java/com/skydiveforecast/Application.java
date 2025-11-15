@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EntityScan("com.skydiveforecast.domain.model")
-@EnableJpaRepositories("com.skydiveforecast.infrastructure.adapter.out.persistance")
+@EnableJpaRepositories("com.skydiveforecast.infrastructure.adapter.out.persistence")
 public class Application {
 
     public static void main(String[] args) {

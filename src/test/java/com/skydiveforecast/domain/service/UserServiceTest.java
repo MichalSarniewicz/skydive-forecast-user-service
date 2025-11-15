@@ -1,10 +1,9 @@
 package com.skydiveforecast.domain.service;
 
-import com.skydiveforecast.application.*;
+import com.skydiveforecast.application.service.UserService;
 import com.skydiveforecast.domain.model.*;
+import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import com.skydiveforecast.domain.service.validation.PasswordValidatorService;
-import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,13 +19,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceImplTest {
+class UserServiceTest {
 
     @InjectMocks
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepositoryPort userRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;

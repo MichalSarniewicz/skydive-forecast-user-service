@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.security;
 
-import com.skydiveforecast.infrastructure.adapter.out.persistance.RolePermissionRepository;
+import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,7 +12,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class PermissionSecurityService {
 
-    private final RolePermissionRepository rolePermissionRepository;
+    private final RolePermissionRepositoryPort rolePermissionRepository;
 
     public boolean hasPermission(String permission) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.aop;
 
-import com.skydiveforecast.infrastructure.security.PermissionSecurity;
+import com.skydiveforecast.domain.annotation.PermissionSecurity;
 import com.skydiveforecast.infrastructure.security.PermissionSecurityService;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -19,19 +19,18 @@ public class PermissionSecurityAspect {
 
     private final PermissionSecurityService permissionSecurityService;
 
-    @Around("@annotation(com.skydiveforecast.infrastructure.security.PermissionSecurity)")
+    @Around("@annotation(com.skydiveforecast.domain.annotation.PermissionSecurity)")
     public Object checkPermission(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
-        PermissionSecurity permissionSecurityAnnotation = method.getAnnotation(PermissionSecurity.class);
+        PermissionSecurity annotation = method.getAnnotation(PermissionSecurity.class);
 
-        if (permissionSecurityAnnotation != null) {
-            String permission = permissionSecurityAnnotation.permission();
-            if (!permissionSecurityService.hasPermission(permission)) {
-                throw new AccessDeniedException("Access Denied: You do not have the required permission '" + permission + "'");
-            }
-        } else {
+        if (annotation == null) {
             throw new AccessDeniedException("Access Denied: PermissionSecurity annotation not found on method.");
+        }
+
+        if (!permissionSecurityService.hasPermission(annotation.permission())) {
+            throw new AccessDeniedException("Access Denied: You do not have the required permission '" + annotation.permission() + "'");
         }
 
         return joinPoint.proceed();

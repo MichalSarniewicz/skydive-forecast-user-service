@@ -1,5 +1,6 @@
 package com.skydiveforecast.application;
 
+import com.skydiveforecast.application.service.RolePermissionService;
 import com.skydiveforecast.domain.model.PermissionEntity;
 import com.skydiveforecast.domain.model.RoleEntity;
 import com.skydiveforecast.domain.model.RolePermissionEntity;
@@ -7,9 +8,9 @@ import com.skydiveforecast.infrastructure.adapter.in.web.dto.AssignPermissionsTo
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateRolePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionsDto;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.PermissionRepository;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.RolePermissionRepository;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.RoleRepository;
+import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
+import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
+import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,17 +28,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RolePermissionServiceImplTest {
+class RolePermissionServiceTest {
 
     @Mock
-    private RolePermissionRepository rolePermissionRepository;
+    private RolePermissionRepositoryPort rolePermissionRepository;
+
     @Mock
-    private RoleRepository roleRepository;
+    private RoleRepositoryPort roleRepository;
+
     @Mock
-    private PermissionRepository permissionRepository;
+    private PermissionRepositoryPort permissionRepository;
 
     @InjectMocks
-    private RolePermissionServiceImpl rolePermissionService;
+    private RolePermissionService rolePermissionService;
 
     @Test
     @DisplayName("Should get all role permissions successfully")
@@ -148,7 +151,7 @@ class RolePermissionServiceImplTest {
         perm2.setId(2L);
         
         when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
-        when(permissionRepository.findByIdIn(any())).thenReturn(Set.of(perm1, perm2));
+        when(permissionRepository.findByIdIn(any())).thenReturn(List.of(perm1, perm2));
         when(rolePermissionRepository.saveAll(any())).thenReturn(List.of(createRolePermissionEntity()));
 
         // Act
@@ -156,7 +159,7 @@ class RolePermissionServiceImplTest {
 
         // Assert
         assertNotNull(result);
-        verify(rolePermissionRepository).deleteByRoleId(1L);
+        verify(rolePermissionRepository).deleteAllByRoleId(1L);
         verify(rolePermissionRepository).saveAll(any());
     }
 
@@ -217,7 +220,7 @@ class RolePermissionServiceImplTest {
         rolePermissionService.deleteAllRolePermissionsByRoleId(roleId);
 
         // Assert
-        verify(rolePermissionRepository).deleteByIdIn(any());
+        verify(rolePermissionRepository).deleteById(entity.getId());
     }
 
     @Test
@@ -244,7 +247,7 @@ class RolePermissionServiceImplTest {
         rolePermissionService.deleteAllRolePermissionsByPermissionId(permissionId);
 
         // Assert
-        verify(rolePermissionRepository).deleteByIdIn(any());
+        verify(rolePermissionRepository).deleteById(entity.getId());
     }
 
     private RolePermissionEntity createRolePermissionEntity() {

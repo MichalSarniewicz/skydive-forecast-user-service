@@ -1,5 +1,6 @@
-package com.skydiveforecast.application;
+package com.skydiveforecast.application.service;
 
+import com.skydiveforecast.domain.exception.BusinessRuleException;
 import com.skydiveforecast.domain.model.RoleEntity;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.RoleMapper;
 import com.skydiveforecast.domain.port.in.AddRoleUseCase;
@@ -7,7 +8,7 @@ import com.skydiveforecast.domain.port.in.DeleteRoleUseCase;
 import com.skydiveforecast.domain.port.in.GetAllRolesUseCase;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolesDto;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.RoleRepository;
+import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -21,9 +22,9 @@ import static com.skydiveforecast.infrastructure.config.CacheConfig.ROLES_CACHE;
 
 @Service
 @RequiredArgsConstructor
-public class RoleServiceImpl implements GetAllRolesUseCase, AddRoleUseCase, DeleteRoleUseCase {
+public class RoleService implements GetAllRolesUseCase, AddRoleUseCase, DeleteRoleUseCase {
 
-    private final RoleRepository roleRepository;
+    private final RoleRepositoryPort roleRepository;
     private final RoleMapper roleMapper;
     private static final String ADMIN_ROLE = "ADMIN";
 
@@ -49,11 +50,12 @@ public class RoleServiceImpl implements GetAllRolesUseCase, AddRoleUseCase, Dele
     @Override
     @CacheEvict(value = ROLES_CACHE, allEntries = true)
     public void deleteRole(Long roleId) {
-        RoleEntity roleEntity = roleRepository.findById(roleId).orElseThrow(() -> new EntityNotFoundException("Role with ID " + roleId + " does not exist"));
+        RoleEntity roleEntity = roleRepository.findById(roleId)
+                .orElseThrow(() -> new EntityNotFoundException("Role with ID " + roleId + " does not exist"));
 
         if (ADMIN_ROLE.equals(roleEntity.getName())) {
-            throw new EntityNotFoundException("The ADMIN role cannot be deleted");
+            throw new BusinessRuleException("The ADMIN role cannot be deleted");
         }
-        roleRepository.delete(roleEntity);
+        roleRepository.deleteById(roleEntity.getId());
     }
 }

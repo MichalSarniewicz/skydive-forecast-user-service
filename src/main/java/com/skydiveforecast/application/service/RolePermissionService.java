@@ -1,4 +1,4 @@
-package com.skydiveforecast.application;
+package com.skydiveforecast.application.service;
 
 import com.skydiveforecast.domain.model.PermissionEntity;
 import com.skydiveforecast.domain.model.RoleEntity;
@@ -8,9 +8,9 @@ import com.skydiveforecast.infrastructure.adapter.in.web.dto.AssignPermissionsTo
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateRolePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionsDto;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.PermissionRepository;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.RolePermissionRepository;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.RoleRepository;
+import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
+import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
+import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -28,7 +28,7 @@ import static com.skydiveforecast.infrastructure.config.CacheConfig.ROLE_PERMISS
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class RolePermissionServiceImpl implements
+public class RolePermissionService implements
         GetAllRolePermissionsUseCase,
         GetRolePermissionsByRoleIdUseCase,
         GetRolePermissionsByPermissionIdUseCase,
@@ -39,9 +39,9 @@ public class RolePermissionServiceImpl implements
         DeleteAllRolePermissionsByRoleIdUseCase,
         DeleteAllRolePermissionsByPermissionIdUseCase {
 
-    private final RolePermissionRepository rolePermissionRepository;
-    private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
+    private final RolePermissionRepositoryPort rolePermissionRepository;
+    private final RoleRepositoryPort roleRepository;
+    private final PermissionRepositoryPort permissionRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -113,14 +113,15 @@ public class RolePermissionServiceImpl implements
         RoleEntity role = roleRepository.findById(assignPermissionsToRoleDto.getRoleId())
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
-        Set<PermissionEntity> permissions = permissionRepository.findByIdIn(assignPermissionsToRoleDto.getPermissionIds());
+        List<PermissionEntity> permissionsList = permissionRepository.findByIdIn(assignPermissionsToRoleDto.getPermissionIds());
+        Set<PermissionEntity> permissions = Set.copyOf(permissionsList);
 
         if (permissions.size() != assignPermissionsToRoleDto.getPermissionIds().size()) {
             throw new IllegalArgumentException("One or more permissions not found");
         }
 
         // Remove existing permissions for this role
-        rolePermissionRepository.deleteByRoleId(assignPermissionsToRoleDto.getRoleId());
+        rolePermissionRepository.deleteAllByRoleId(assignPermissionsToRoleDto.getRoleId());
 
         // Create new role-permission relationships
         List<RolePermissionEntity> entities = permissions.stream()
@@ -163,7 +164,7 @@ public class RolePermissionServiceImpl implements
                 .map(RolePermissionEntity::getId)
                 .collect(Collectors.toList());
 
-        rolePermissionRepository.deleteByIdIn(ids);
+        ids.forEach(rolePermissionRepository::deleteById);
     }
 
     @Override
@@ -177,7 +178,7 @@ public class RolePermissionServiceImpl implements
                 .map(RolePermissionEntity::getId)
                 .collect(Collectors.toList());
 
-        rolePermissionRepository.deleteByIdIn(ids);
+        ids.forEach(rolePermissionRepository::deleteById);
     }
 
     private RolePermissionDto mapToDto(RolePermissionEntity entity) {

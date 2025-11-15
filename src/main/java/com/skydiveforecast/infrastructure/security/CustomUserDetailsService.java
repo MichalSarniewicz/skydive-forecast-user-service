@@ -3,7 +3,7 @@ package com.skydiveforecast.infrastructure.security;
 import com.skydiveforecast.domain.model.RoleEntity;
 import com.skydiveforecast.domain.model.UserEntity;
 import com.skydiveforecast.domain.model.UserRoleEntity;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.UserRepository;
+import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryPort userRepository;
 
     @Override
     @Transactional

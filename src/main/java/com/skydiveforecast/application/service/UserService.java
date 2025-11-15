@@ -1,4 +1,4 @@
-package com.skydiveforecast.application;
+package com.skydiveforecast.application.service;
 
 import com.skydiveforecast.domain.exception.ValidationException;
 import com.skydiveforecast.domain.model.UserEntity;
@@ -7,8 +7,9 @@ import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UpdateUserMapper
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UserMapper;
 import com.skydiveforecast.domain.port.in.*;
 import com.skydiveforecast.domain.service.validation.PasswordValidatorService;
+import com.skydiveforecast.domain.service.validation.UserValidator;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.UserRepository;
+import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -24,15 +25,16 @@ import static com.skydiveforecast.infrastructure.config.CacheConfig.USERS_CACHE;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UpdateUserStatusUseCase, FindUserByIdUseCase, ChangePasswordUseCase,
+public class UserService implements UpdateUserStatusUseCase, FindUserByIdUseCase, ChangePasswordUseCase,
         GetAllUsersUseCase, CreateUserUseCase, UpdateUserUseCase {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryPort userRepository;
     private final UserMapper userMapper;
     private final UpdateUserMapper updateUserMapper;
     private final PasswordEncoder passwordEncoder;
     private final CreateUserMapper createUserMapper;
     private final PasswordValidatorService passwordValidator;
+    private final UserValidator userValidator;
 
     @Override
     @CacheEvict(value = USERS_CACHE, allEntries = true)
@@ -69,25 +71,20 @@ public class UserServiceImpl implements UpdateUserStatusUseCase, FindUserByIdUse
     public void changePassword(Long userId, String currentPassword, String newPassword) {
         UserEntity currentUser = findUserById(userId);
 
-        // Validate current password
         if (!passwordEncoder.matches(currentPassword, currentUser.getPasswordHash())) {
             throw new ValidationException(Map.of("currentPassword", "Current password is incorrect"));
         }
 
-        // Validate new password
         Map<String, String> passwordErrors = passwordValidator.validate(newPassword);
 
-        // Check if the new password is the same as a current password
         if (passwordEncoder.matches(newPassword, currentUser.getPasswordHash())) {
             passwordErrors.put("newPassword", "New password must be different from the current password");
         }
 
-        // If there are any validation errors, throw ValidationException
         if (!passwordErrors.isEmpty()) {
             throw new ValidationException(passwordErrors);
         }
 
-        // If validation passes, update the password
         currentUser.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(currentUser);
     }
@@ -104,44 +101,17 @@ public class UserServiceImpl implements UpdateUserStatusUseCase, FindUserByIdUse
     public UserDto createUser(CreateUserDto createUserDto) {
         Map<String, String> errors = new HashMap<>();
 
-        // Email validation
-        if (createUserDto.getEmail() == null || createUserDto.getEmail().isBlank()) {
-            errors.put("email", "Email is required");
-        } else if (userRepository.existsByEmail(createUserDto.getEmail())) {
-            errors.put("email", "Email already in use");
-        }
-
-        // Name validation
-        if (createUserDto.getFirstName() == null || createUserDto.getFirstName().isBlank()) {
-            errors.put("firstName", "First name is required");
-        } else if (createUserDto.getFirstName().length() > 50) {
-            errors.put("firstName", "First name cannot exceed 50 characters");
-        }
-
-        if (createUserDto.getLastName() == null || createUserDto.getLastName().isBlank()) {
-            errors.put("lastName", "Last name is required");
-        } else if (createUserDto.getLastName().length() > 50) {
-            errors.put("lastName", "Last name cannot exceed 50 characters");
-        }
-
-        // Phone number validation
-        if (createUserDto.getPhoneNumber() != null && !createUserDto.getPhoneNumber().matches("^\\+?[0-9]{10,15}$")) {
-            errors.put("phoneNumber", "Phone number must be valid");
-        }
-
-        // Password validation
-        Map<String, String> passwordErrors = passwordValidator.validate(createUserDto.getPassword());
-        errors.putAll(passwordErrors);
+        errors.putAll(userValidator.validateEmail(createUserDto.getEmail(), true));
+        errors.putAll(userValidator.validateName(createUserDto.getFirstName(), createUserDto.getLastName()));
+        errors.putAll(userValidator.validatePhoneNumber(createUserDto.getPhoneNumber()));
+        errors.putAll(passwordValidator.validate(createUserDto.getPassword()));
 
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
 
-        // If validation passes, create the user
         UserEntity entity = createUserMapper.toEntity(createUserDto);
         entity.setPasswordHash(passwordEncoder.encode(createUserDto.getPassword()));
-
-        UserEntity savedEntity = userRepository.save(entity);
-        return userMapper.toDto(savedEntity);
+        return userMapper.toDto(userRepository.save(entity));
     }
 }

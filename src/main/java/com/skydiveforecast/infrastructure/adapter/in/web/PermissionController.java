@@ -8,7 +8,7 @@ import com.skydiveforecast.infrastructure.adapter.in.web.dto.PermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.PermissionsDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UpdatePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreatePermissionDto;
-import com.skydiveforecast.infrastructure.security.PermissionSecurity;
+import com.skydiveforecast.domain.annotation.PermissionSecurity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

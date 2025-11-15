@@ -28,10 +28,7 @@ public class AuthBusinessServiceImpl implements AuthBusinessService {
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        String username = request.getUsername();
-
         try {
-            // Authentication
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
@@ -39,9 +36,7 @@ public class AuthBusinessServiceImpl implements AuthBusinessService {
                     )
             );
 
-            // Load user details
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
+            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
             return buildAuthenticationResponse(userDetails);
 
         } catch (BadCredentialsException e) {
@@ -66,16 +61,13 @@ public class AuthBusinessServiceImpl implements AuthBusinessService {
     }
 
     private AuthenticationResponse buildAuthenticationResponse(UserDetails userDetails) {
-        // Generate tokens using existing AuthService
         String accessToken = authService.generateToken(userDetails);
         String refreshToken = authService.generateRefreshToken(userDetails);
 
-        // Extract roles
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        // Extract additional information from CustomUserPrincipal
         boolean isActive = false;
         Long userId = null;
         Set<String> permissions = new HashSet<>();
@@ -83,11 +75,9 @@ public class AuthBusinessServiceImpl implements AuthBusinessService {
         if (userDetails instanceof CustomUserPrincipal userPrincipal) {
             isActive = userPrincipal.isActive();
             userId = userPrincipal.getUserId();
-        }
-
-        // Get user permissions
-        if (userId != null) {
-            permissions = getPermissionCodesByUserIdUseCase.getPermissionCodesByUserId(userId);
+            if (userId != null) {
+                permissions = getPermissionCodesByUserIdUseCase.getPermissionCodesByUserId(userId);
+            }
         }
 
         return AuthenticationResponse.builder()

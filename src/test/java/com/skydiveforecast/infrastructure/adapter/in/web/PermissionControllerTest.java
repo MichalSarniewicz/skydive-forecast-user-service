@@ -36,7 +36,12 @@ class PermissionControllerTest {
     @DisplayName("Should get all permissions successfully")
     void getAllPermissions_Success() {
         // Arrange
-        PermissionsDto dto = new PermissionsDto(List.of(new PermissionDto()));
+        PermissionDto permission = PermissionDto.builder()
+                .id(1L)
+                .code("USER_READ")
+                .description("Read user data")
+                .build();
+        PermissionsDto dto = new PermissionsDto(List.of(permission));
         when(getAllPermissionsUseCase.getAllPermissions()).thenReturn(dto);
 
         // Act
@@ -45,6 +50,8 @@ class PermissionControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().getPermissions().size());
+        assertEquals("USER_READ", response.getBody().getPermissions().get(0).getCode());
         verify(getAllPermissionsUseCase).getAllPermissions();
     }
 
@@ -52,17 +59,25 @@ class PermissionControllerTest {
     @DisplayName("Should create permission successfully")
     void createPermission_Success() {
         // Arrange
-        CreatePermissionDto dto = new CreatePermissionDto();
-        PermissionDto result = new PermissionDto();
-        when(createPermissionUseCase.createPermission(any())).thenReturn(result);
+        CreatePermissionDto createDto = CreatePermissionDto.builder()
+                .code("USER_DELETE")
+                .description("Delete user")
+                .build();
+        PermissionDto result = PermissionDto.builder()
+                .id(1L)
+                .code("USER_DELETE")
+                .description("Delete user")
+                .build();
+        when(createPermissionUseCase.createPermission(createDto)).thenReturn(result);
 
         // Act
-        ResponseEntity<PermissionDto> response = permissionController.createPermission(dto);
+        ResponseEntity<PermissionDto> response = permissionController.createPermission(createDto);
 
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        verify(createPermissionUseCase).createPermission(dto);
+        assertEquals("USER_DELETE", response.getBody().getCode());
+        verify(createPermissionUseCase).createPermission(createDto);
     }
 
     @Test
@@ -70,17 +85,26 @@ class PermissionControllerTest {
     void updatePermission_Success() {
         // Arrange
         Long id = 1L;
-        UpdatePermissionDto dto = new UpdatePermissionDto();
-        PermissionDto result = new PermissionDto();
-        when(updatePermissionUseCase.updatePermission(any(), any())).thenReturn(result);
+        UpdatePermissionDto updateDto = UpdatePermissionDto.builder()
+                .code("USER_UPDATE")
+                .description("Update user data")
+                .build();
+        PermissionDto result = PermissionDto.builder()
+                .id(id)
+                .code("USER_UPDATE")
+                .description("Update user data")
+                .build();
+        when(updatePermissionUseCase.updatePermission(id, updateDto)).thenReturn(result);
 
         // Act
-        ResponseEntity<PermissionDto> response = permissionController.updatePermission(id, dto);
+        ResponseEntity<PermissionDto> response = permissionController.updatePermission(id, updateDto);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        verify(updatePermissionUseCase).updatePermission(id, dto);
+        assertEquals(id, response.getBody().getId());
+        assertEquals("USER_UPDATE", response.getBody().getCode());
+        verify(updatePermissionUseCase).updatePermission(id, updateDto);
     }
 
     @Test
@@ -94,6 +118,7 @@ class PermissionControllerTest {
 
         // Assert
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
         verify(deletePermissionUseCase).deletePermission(id);
     }
 }

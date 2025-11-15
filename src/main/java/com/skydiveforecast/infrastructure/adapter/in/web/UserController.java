@@ -3,7 +3,7 @@ package com.skydiveforecast.infrastructure.adapter.in.web;
 import com.skydiveforecast.domain.port.in.*;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
 import com.skydiveforecast.infrastructure.security.AuthService;
-import com.skydiveforecast.infrastructure.security.PermissionSecurity;
+import com.skydiveforecast.domain.annotation.PermissionSecurity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

@@ -1,13 +1,15 @@
 package com.skydiveforecast.application;
 
+import com.skydiveforecast.application.service.UserService;
 import com.skydiveforecast.domain.exception.ValidationException;
 import com.skydiveforecast.domain.model.UserEntity;
 import com.skydiveforecast.domain.service.validation.PasswordValidatorService;
+import com.skydiveforecast.domain.service.validation.UserValidator;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.CreateUserMapper;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UpdateUserMapper;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UserMapper;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.UserRepository;
+import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,26 +26,35 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceImplTest {
+class UserServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepositoryPort userRepository;
+
     @Mock
     private UserMapper userMapper;
+
     @Mock
     private UpdateUserMapper updateUserMapper;
+
     @Mock
     private PasswordEncoder passwordEncoder;
+
     @Mock
     private CreateUserMapper createUserMapper;
+
     @Mock
     private PasswordValidatorService passwordValidator;
 
+    @Mock
+    private UserValidator userValidator;
+
     @InjectMocks
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Test
     @DisplayName("Should get all users successfully")
@@ -76,7 +87,9 @@ class UserServiceImplTest {
         UserEntity entity = new UserEntity();
         entity.setId(1L);
         
-        when(userRepository.existsByEmail(any())).thenReturn(false);
+        when(userValidator.validateEmail(any(), eq(true))).thenReturn(new HashMap<>());
+        when(userValidator.validateName(any(), any())).thenReturn(new HashMap<>());
+        when(userValidator.validatePhoneNumber(any())).thenReturn(new HashMap<>());
         when(passwordValidator.validate(any())).thenReturn(new HashMap<>());
         when(createUserMapper.toEntity(any())).thenReturn(entity);
         when(passwordEncoder.encode(any())).thenReturn("encoded");
@@ -101,7 +114,11 @@ class UserServiceImplTest {
         dto.setLastName("Doe");
         dto.setPassword("Password123!");
         
-        when(userRepository.existsByEmail(any())).thenReturn(true);
+        Map<String, String> emailErrors = Map.of("email", "Email already in use");
+        when(userValidator.validateEmail(any(), eq(true))).thenReturn(emailErrors);
+        when(userValidator.validateName(any(), any())).thenReturn(new HashMap<>());
+        when(userValidator.validatePhoneNumber(any())).thenReturn(new HashMap<>());
+        when(passwordValidator.validate(any())).thenReturn(new HashMap<>());
 
         // Act & Assert
         assertThrows(ValidationException.class, () -> userService.createUser(dto));
@@ -230,7 +247,12 @@ class UserServiceImplTest {
         dto.setLastName("Doe");
         dto.setPassword("Password123!");
 
-        // Act & Assert
+        Map<String, String> nameErrors = Map.of("firstName", "First name is required");
+        when(userValidator.validateEmail(any(), eq(true))).thenReturn(new HashMap<>());
+        when(userValidator.validateName(any(), any())).thenReturn(nameErrors);
+        when(userValidator.validatePhoneNumber(any())).thenReturn(new HashMap<>());
+        when(passwordValidator.validate(any())).thenReturn(new HashMap<>());
+
         assertThrows(ValidationException.class, () -> userService.createUser(dto));
     }
 
@@ -245,6 +267,12 @@ class UserServiceImplTest {
         dto.setPassword("Password123!");
 
         // Act & Assert
+        Map<String, String> nameErrors = Map.of("lastName", "Last name is required");
+        when(userValidator.validateEmail(any(), eq(true))).thenReturn(new HashMap<>());
+        when(userValidator.validateName(any(), any())).thenReturn(nameErrors);
+        when(userValidator.validatePhoneNumber(any())).thenReturn(new HashMap<>());
+        when(passwordValidator.validate(any())).thenReturn(new HashMap<>());
+
         assertThrows(ValidationException.class, () -> userService.createUser(dto));
     }
 
@@ -259,7 +287,11 @@ class UserServiceImplTest {
         dto.setPhoneNumber("invalid");
         dto.setPassword("Password123!");
         
-        when(userRepository.existsByEmail(any())).thenReturn(false);
+        Map<String, String> phoneErrors = Map.of("phoneNumber", "Phone number must be valid");
+        when(userValidator.validateEmail(any(), eq(true))).thenReturn(new HashMap<>());
+        when(userValidator.validateName(any(), any())).thenReturn(new HashMap<>());
+        when(userValidator.validatePhoneNumber(any())).thenReturn(phoneErrors);
+        when(passwordValidator.validate(any())).thenReturn(new HashMap<>());
 
         // Act & Assert
         assertThrows(ValidationException.class, () -> userService.createUser(dto));
@@ -275,11 +307,11 @@ class UserServiceImplTest {
         dto.setLastName("Doe");
         dto.setPassword("weak");
         
-        Map<String, String> errors = new HashMap<>();
-        errors.put("password", "Password too weak");
-        
-        when(userRepository.existsByEmail(any())).thenReturn(false);
-        when(passwordValidator.validate(any())).thenReturn(errors);
+        Map<String, String> passwordErrors = Map.of("password", "Password too weak");
+        when(userValidator.validateEmail(any(), eq(true))).thenReturn(new HashMap<>());
+        when(userValidator.validateName(any(), any())).thenReturn(new HashMap<>());
+        when(userValidator.validatePhoneNumber(any())).thenReturn(new HashMap<>());
+        when(passwordValidator.validate(any())).thenReturn(passwordErrors);
 
         // Act & Assert
         assertThrows(ValidationException.class, () -> userService.createUser(dto));

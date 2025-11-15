@@ -5,7 +5,7 @@ import com.skydiveforecast.infrastructure.adapter.in.web.dto.AssignPermissionsTo
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateRolePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionsDto;
-import com.skydiveforecast.infrastructure.security.PermissionSecurity;
+import com.skydiveforecast.domain.annotation.PermissionSecurity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

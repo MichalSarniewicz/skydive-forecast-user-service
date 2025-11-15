@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.security;
 
-import com.skydiveforecast.infrastructure.adapter.out.persistance.RolePermissionRepository;
+import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class PermissionSecurityServiceTest {
 
     @Mock
-    private RolePermissionRepository rolePermissionRepository;
+    private RolePermissionRepositoryPort rolePermissionRepository;
 
     @InjectMocks
     private PermissionSecurityService permissionSecurityService;

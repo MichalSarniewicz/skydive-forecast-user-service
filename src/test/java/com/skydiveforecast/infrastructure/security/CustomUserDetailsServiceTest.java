@@ -3,7 +3,7 @@ package com.skydiveforecast.infrastructure.security;
 import com.skydiveforecast.domain.model.RoleEntity;
 import com.skydiveforecast.domain.model.UserEntity;
 import com.skydiveforecast.domain.model.UserRoleEntity;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.UserRepository;
+import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class CustomUserDetailsServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepositoryPort userRepository;
 
     @InjectMocks
     private CustomUserDetailsService customUserDetailsService;

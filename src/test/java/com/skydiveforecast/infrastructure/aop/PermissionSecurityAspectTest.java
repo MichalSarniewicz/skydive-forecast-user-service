@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.aop;
 
-import com.skydiveforecast.infrastructure.security.PermissionSecurity;
+import com.skydiveforecast.domain.annotation.PermissionSecurity;
 import com.skydiveforecast.infrastructure.security.PermissionSecurityService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;

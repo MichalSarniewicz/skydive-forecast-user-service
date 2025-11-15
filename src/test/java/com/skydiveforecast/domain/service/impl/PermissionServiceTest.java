@@ -1,9 +1,11 @@
 package com.skydiveforecast.domain.service.impl;
 
-import com.skydiveforecast.application.PermissionServiceImpl;
+import com.skydiveforecast.application.service.PermissionService;
 import com.skydiveforecast.domain.model.*;
+import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
+import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.*;
+import com.skydiveforecast.infrastructure.adapter.in.web.mapper.PermissionMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,13 +21,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PermissionServiceImplTest {
+class PermissionServiceTest {
 
     @Mock
-    private PermissionRepository permissionRepository;
+    private PermissionRepositoryPort permissionRepository;
+
+    @Mock
+    private RolePermissionRepositoryPort rolePermissionRepository;
+
+    @Mock
+    private PermissionMapper permissionMapper;
 
     @InjectMocks
-    private PermissionServiceImpl permissionService;
+    private PermissionService permissionService;
 
     @Test
     @DisplayName("Should update permission when valid ID and UpdatePermissionDto are provided")
@@ -47,8 +55,15 @@ class PermissionServiceImplTest {
                 .description(updatePermissionDto.getDescription())
                 .build();
 
+        PermissionDto resultDto = PermissionDto.builder()
+                .id(id)
+                .code(updatePermissionDto.getCode())
+                .description(updatePermissionDto.getDescription())
+                .build();
+
         when(permissionRepository.findById(id)).thenReturn(Optional.of(existingPermission));
-        when(permissionRepository.save(any(PermissionEntity.class))).thenReturn(updatedPermission);
+        when(permissionRepository.save(existingPermission)).thenReturn(updatedPermission);
+        when(permissionMapper.toDto(updatedPermission)).thenReturn(resultDto);
 
         // Act
         PermissionDto result = permissionService.updatePermission(id, updatePermissionDto);
@@ -57,6 +72,7 @@ class PermissionServiceImplTest {
         assertEquals(updatePermissionDto.getCode(), result.getCode());
         assertEquals(updatePermissionDto.getDescription(), result.getDescription());
         verify(permissionRepository, times(1)).findById(id);
+        verify(permissionMapper, times(1)).updateEntityFromDto(updatePermissionDto, existingPermission);
         verify(permissionRepository, times(1)).save(existingPermission);
     }
 

@@ -1,4 +1,4 @@
-package com.skydiveforecast.application;
+package com.skydiveforecast.application.service;
 
 import com.skydiveforecast.domain.model.RoleEntity;
 import com.skydiveforecast.domain.model.UserEntity;
@@ -11,9 +11,9 @@ import com.skydiveforecast.domain.port.in.RemoveRoleFromUserUseCase;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateUserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRolesDto;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.RoleRepository;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.UserRepository;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.UserRoleRepository;
+import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
+import com.skydiveforecast.domain.port.out.UserRepositoryPort;
+import com.skydiveforecast.domain.port.out.UserRoleRepositoryPort;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -28,13 +28,13 @@ import static com.skydiveforecast.infrastructure.config.CacheConfig.USER_ROLES_C
 
 @Service
 @RequiredArgsConstructor
-public class UserRoleServiceImpl implements GetAllUserRolesUseCase, GetUserRolesUseCase,
+public class UserRoleService implements GetAllUserRolesUseCase, GetUserRolesUseCase,
         AssignRoleToUserUseCase, RemoveRoleFromUserUseCase {
 
-    private final UserRoleRepository userRoleRepository;
+    private final UserRoleRepositoryPort userRoleRepository;
     private final UserRoleMapper userRoleMapper;
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final UserRepositoryPort userRepository;
+    private final RoleRepositoryPort roleRepository;
 
     @Override
     @Cacheable(value = USER_ROLES_CACHE, key = "'all'")

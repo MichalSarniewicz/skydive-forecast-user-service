@@ -1,12 +1,14 @@
 package com.skydiveforecast.domain.service;
 
-import com.skydiveforecast.application.RoleServiceImpl;
-import com.skydiveforecast.application.UserRoleServiceImpl;
+import com.skydiveforecast.application.service.RoleService;
+import com.skydiveforecast.application.service.UserRoleService;
 import com.skydiveforecast.domain.model.*;
+import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
+import com.skydiveforecast.domain.port.out.UserRepositoryPort;
+import com.skydiveforecast.domain.port.out.UserRoleRepositoryPort;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.RoleMapper;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UserRoleMapper;
-import com.skydiveforecast.infrastructure.adapter.out.persistance.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,25 +26,25 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserRoleServiceImplTest {
+class UserRoleServiceTest {
 
     @Mock
     private RoleMapper roleMapper;
 
     @InjectMocks
-    private RoleServiceImpl roleService;
+    private RoleService roleService;
 
     @Mock
-    private UserRoleRepository userRoleRepository;
+    private UserRoleRepositoryPort userRoleRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepositoryPort userRepository;
 
     @Mock
-    private RoleRepository roleRepository;
+    private RoleRepositoryPort roleRepository;
 
     @InjectMocks
-    private UserRoleServiceImpl userRoleService;
+    private UserRoleService userRoleService;
 
     @Mock
     private UserRoleMapper userRoleMapper;

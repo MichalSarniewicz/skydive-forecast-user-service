@@ -52,23 +52,17 @@ public class AuthServiceImpl implements AuthService {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
 
-        // Add roles to the token
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-
         claims.put("roles", roles);
 
-        // Add permissions to the token
-        Long userId = null;
-        if (userDetails instanceof CustomUserPrincipal) {
-            userId = ((CustomUserPrincipal) userDetails).getUserId();
-        }
-
-        if (userId != null) {
-            Set<String> permissions = getPermissionCodesByUserIdUseCase.getPermissionCodesByUserId(userId);
-            claims.put("permissions", permissions);
-            claims.put("userId", userId);
+        if (userDetails instanceof CustomUserPrincipal userPrincipal) {
+            Long userId = userPrincipal.getUserId();
+            if (userId != null) {
+                claims.put("permissions", getPermissionCodesByUserIdUseCase.getPermissionCodesByUserId(userId));
+                claims.put("userId", userId);
+            }
         }
 
         return createToken(claims, userDetails.getUsername(), jwtExpiration);
@@ -76,8 +70,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String generateRefreshToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername(), refreshExpiration);
+        return createToken(new HashMap<>(), userDetails.getUsername(), refreshExpiration);
     }
 
     @Override
