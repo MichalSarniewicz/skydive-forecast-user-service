@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users/roles")
+@RequestMapping("/api/v1/users/roles")
 @RequiredArgsConstructor
 @Tag(name = "Roles", description = "Endpoints for managing roles")
 public class RoleController {

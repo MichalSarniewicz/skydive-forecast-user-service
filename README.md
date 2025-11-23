@@ -96,43 +96,43 @@ mvn spring-boot:run -Dspring-boot.run.profiles=prod
 
 ### Authentication
 
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Authenticate user
-- `POST /api/auth/refresh` - Refresh access token
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - Authenticate user
+- `POST /api/v1/auth/refresh` - Refresh access token
 
 ### Users
 
-- `GET /api/users` - Get all users
-- `GET /api/users/{id}` - Get user by ID
-- `PUT /api/users/{id}` - Update user
-- `PUT /api/users/{id}/status` - Update user status
-- `PUT /api/users/{id}/password` - Change password
+- `GET /api/v1/users` - Get all users
+- `GET /api/v1/users/{id}` - Get user by ID
+- `PUT /api/v1/users/{id}` - Update user
+- `PUT /api/v1/users/{id}/status` - Update user status
+- `PUT /api/v1/users/{id}/password` - Change password
 
 ### Roles
 
-- `GET /api/roles` - Get all roles
-- `POST /api/roles` - Create role
-- `PUT /api/roles/{id}` - Update role
-- `DELETE /api/roles/{id}` - Delete role
+- `GET /api/v1/roles` - Get all roles
+- `POST /api/v1/roles` - Create role
+- `PUT /api/v1/roles/{id}` - Update role
+- `DELETE /api/v1/roles/{id}` - Delete role
 
 ### Permissions
 
-- `GET /api/permissions` - Get all permissions
-- `POST /api/permissions` - Create permission
-- `PUT /api/permissions/{id}` - Update permission
-- `DELETE /api/permissions/{id}` - Delete permission
+- `GET /api/v1/permissions` - Get all permissions
+- `POST /api/v1/permissions` - Create permission
+- `PUT /api/v1/permissions/{id}` - Update permission
+- `DELETE /api/v1/permissions/{id}` - Delete permission
 
 ### Role-Permission Management
 
-- `POST /api/role-permissions` - Assign permission to role
-- `DELETE /api/role-permissions` - Remove permission from role
-- `GET /api/role-permissions/role/{roleId}` - Get permissions by role
+- `POST /api/v1/role-permissions` - Assign permission to role
+- `DELETE /api/v1/role-permissions` - Remove permission from role
+- `GET /api/v1/role-permissions/role/{roleId}` - Get permissions by role
 
 ### User-Role Management
 
-- `POST /api/user-roles` - Assign role to user
-- `DELETE /api/user-roles` - Remove role from user
-- `GET /api/user-roles/user/{userId}` - Get roles by user
+- `POST /api/v1/user-roles` - Assign role to user
+- `DELETE /api/v1/user-roles` - Remove role from user
+- `GET /api/v1/user-roles/user/{userId}` - Get roles by user
 
 ## API Documentation
 

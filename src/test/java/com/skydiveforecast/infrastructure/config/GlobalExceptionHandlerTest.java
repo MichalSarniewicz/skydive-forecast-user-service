@@ -38,7 +38,7 @@ class GlobalExceptionHandlerTest {
 
     @BeforeEach
     void setUp() {
-        when(request.getRequestURI()).thenReturn("/api/test");
+        when(request.getRequestURI()).thenReturn("/api/v1/test");
     }
 
     @Test
@@ -260,7 +260,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleNoHandlerFound_ShouldReturnNotFound() {
         // Arrange
-        NoHandlerFoundException exception = new NoHandlerFoundException("GET", "/api/test", null);
+        NoHandlerFoundException exception = new NoHandlerFoundException("GET", "/api/v1/test", null);
 
         // Act
         ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = 

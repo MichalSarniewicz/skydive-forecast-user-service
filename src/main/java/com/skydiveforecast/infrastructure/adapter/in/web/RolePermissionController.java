@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/users/role-permissions")
+@RequestMapping("/api/v1/users/role-permissions")
 @RequiredArgsConstructor
 @Tag(name = "Role Permissions", description = "Endpoints for managing role-permission relationships.")
 public class RolePermissionController {

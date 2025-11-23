@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users/user-roles")
+@RequestMapping("/api/v1/users/user-roles")
 @RequiredArgsConstructor
 @Tag(name = "User Roles", description = "Endpoints for managing user-role assignments")
 public class UserRoleController {
