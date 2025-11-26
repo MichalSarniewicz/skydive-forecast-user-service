@@ -5,8 +5,8 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.0</version>
-		<relativePath/> <!-- lookup parent from the repository -->
+		<version>3.5.6</version>
+		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.skydiveforecast</groupId>
 	<artifactId>skydive-forecast-user-service</artifactId>
@@ -163,7 +163,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-consul-discovery</artifactId>
-            <version>5.0.0</version>
+            <version>4.3.0</version>
         </dependency>
 	</dependencies>
 
