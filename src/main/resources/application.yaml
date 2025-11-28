@@ -50,10 +50,11 @@ management:
 
 springdoc:
   api-docs:
-    path: /v3/api-docs/users
+    path: /v3/api-docs
+    enabled: true
   swagger-ui:
     path: /swagger-ui.html
-    url: /v3/api-docs/users.yaml
+    enabled: true
 
 jwt:
   expiration: 3600000         # 1 hour (ms)
