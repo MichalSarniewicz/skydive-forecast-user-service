@@ -31,7 +31,7 @@ public class UserRoleRepositoryAdapter implements UserRoleRepositoryPort {
 
     @Override
     public List<UserRoleEntity> findAll() {
-        return jpaRepository.findAll();
+        return jpaRepository.findAllWithRole();
     }
 
     @Override

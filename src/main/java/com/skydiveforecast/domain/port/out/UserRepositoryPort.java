@@ -15,6 +15,8 @@ public interface UserRepositoryPort {
 
     List<UserEntity> findAll();
 
+    List<UserEntity> findAllWithRoles();
+
     boolean existsByEmail(String email);
 
     void deleteById(Long id);

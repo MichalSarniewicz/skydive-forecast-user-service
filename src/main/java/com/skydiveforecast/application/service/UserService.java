@@ -92,7 +92,7 @@ public class UserService implements UpdateUserStatusUseCase, FindUserByIdUseCase
     @Override
     @Cacheable(value = USERS_CACHE, key = "'all'")
     public UsersDto getAllUsers() {
-        List<UserEntity> entities = userRepository.findAll();
+        List<UserEntity> entities = userRepository.findAllWithRoles();
         return new UsersDto(userMapper.toDtoList(entities));
     }
 

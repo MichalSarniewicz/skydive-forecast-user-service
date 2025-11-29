@@ -35,6 +35,11 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
+    public List<UserEntity> findAllWithRoles() {
+        return jpaRepository.findAllWithRoles();
+    }
+
+    @Override
     public boolean existsByEmail(String email) {
         return jpaRepository.existsByEmail(email);
     }
