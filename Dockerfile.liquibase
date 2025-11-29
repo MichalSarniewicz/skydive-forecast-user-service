@@ -1,0 +1,6 @@
+FROM liquibase/liquibase:4.29
+
+USER root
+RUN wget -O /liquibase/lib/postgresql.jar https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
+
+USER liquibase
