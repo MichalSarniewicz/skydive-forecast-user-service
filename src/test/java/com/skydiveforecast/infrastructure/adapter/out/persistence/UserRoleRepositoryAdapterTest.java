@@ -79,14 +79,14 @@ class UserRoleRepositoryAdapterTest {
         // Arrange
         UserRoleEntity userRole1 = new UserRoleEntity();
         UserRoleEntity userRole2 = new UserRoleEntity();
-        when(jpaRepository.findAll()).thenReturn(List.of(userRole1, userRole2));
+        when(jpaRepository.findAllWithRole()).thenReturn(List.of(userRole1, userRole2));
 
         // Act
         List<UserRoleEntity> result = adapter.findAll();
 
         // Assert
         assertEquals(2, result.size());
-        verify(jpaRepository).findAll();
+        verify(jpaRepository).findAllWithRole();
     }
 
     @Test

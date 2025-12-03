@@ -62,7 +62,7 @@ class UserServiceTest {
         // Arrange
         UserEntity user = new UserEntity();
         user.setId(1L);
-        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(userRepository.findAllWithRoles()).thenReturn(List.of(user));
         when(userMapper.toDtoList(any())).thenReturn(List.of(new UserDto()));
 
         // Act
@@ -71,7 +71,7 @@ class UserServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.getUsers().size());
-        verify(userRepository).findAll();
+        verify(userRepository).findAllWithRoles();
     }
 
     @Test
