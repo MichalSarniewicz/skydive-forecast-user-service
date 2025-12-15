@@ -12,16 +12,16 @@
     </appender>
 
     <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
-        <http class="com.github.loki4j.logback.ApacheHttpSender">
+        <http>
             <url>${lokiUrl}</url>
-            <connectionTimeoutMs>5000</connectionTimeoutMs>
-            <requestTimeoutMs>5000</requestTimeoutMs>
         </http>
         <format>
             <label>
-                <pattern>app=${appName},host=${HOSTNAME},level=%level</pattern>
+                <pattern>app=${appName},job=${appName},service_name=${appName}</pattern>
             </label>
-            <message class="com.github.loki4j.logback.JsonLayout"/>
+            <message>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </message>
         </format>
     </appender>
 
