@@ -2,6 +2,7 @@ package com.skydiveforecast.infrastructure.adapter.in.web;
 
 import com.skydiveforecast.domain.port.in.*;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
+import com.skydiveforecast.infrastructure.security.AuthService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +26,6 @@ class UserControllerTest {
     @Mock
     private GetAllUsersUseCase getAllUsersUseCase;
     @Mock
-    private FindUserByIdUseCase findUserByIdUseCase;
-    @Mock
     private CreateUserUseCase createUserUseCase;
     @Mock
     private UpdateUserUseCase updateUserUseCase;
@@ -34,6 +33,8 @@ class UserControllerTest {
     private UpdateUserStatusUseCase updateUserStatusUseCase;
     @Mock
     private ChangePasswordUseCase changePasswordUseCase;
+    @Mock
+    private AuthService authService;
 
     @InjectMocks
     private UserController userController;
@@ -105,5 +106,24 @@ class UserControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         verify(updateUserStatusUseCase).updateUserStatus(id, dto);
+    }
+
+    @Test
+    @DisplayName("Should change password successfully")
+    void changePassword_Success() {
+        // Arrange
+        Long userId = 1L;
+        PasswordChangeDto dto = new PasswordChangeDto();
+        dto.setCurrentPassword("oldPass");
+        dto.setNewPassword("newPass");
+        when(authService.getCurrentUserId()).thenReturn(userId);
+
+        // Act
+        ResponseEntity<Void> response = userController.changePassword(dto);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(authService).getCurrentUserId();
+        verify(changePasswordUseCase).changePassword(userId, "oldPass", "newPass");
     }
 }

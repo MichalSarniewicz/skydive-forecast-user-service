@@ -4,6 +4,8 @@ import com.skydiveforecast.infrastructure.security.AuthBusinessService;
 import com.skydiveforecast.infrastructure.security.dto.AuthenticationRequest;
 import com.skydiveforecast.infrastructure.security.dto.AuthenticationResponse;
 import com.skydiveforecast.infrastructure.security.dto.RefreshTokenRequest;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Timer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,19 +17,31 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
 
     @Mock
     private AuthBusinessService authBusinessService;
+
+    @Mock
+    private Counter loginSuccessCounter;
+
+    @Mock
+    private Counter loginFailureCounter;
+
+    @Mock
+    private Counter tokenRefreshCounter;
+
+    @Mock
+    private Timer authenticationTimer;
 
     @InjectMocks
     private AuthController authController;
@@ -49,6 +63,14 @@ class AuthControllerTest {
                 .isActive(true)
                 .build();
         when(authBusinessService.authenticate(any())).thenReturn(result);
+        when(authenticationTimer.record(any(Supplier.class))).thenAnswer(invocation -> {
+            Supplier<?> supplier = invocation.getArgument(0);
+            try {
+                return supplier.get();
+            } catch (Exception e) {
+                return null;
+            }
+        });
 
         // Act
         ResponseEntity<AuthenticationResponse> response = authController.createAuthenticationToken(request);
