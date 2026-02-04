@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.out.persistence;
 
-import com.skydiveforecast.domain.model.PermissionEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.PermissionEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

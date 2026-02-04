@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.out.persistence;
 
-import com.skydiveforecast.domain.model.PermissionEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.PermissionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

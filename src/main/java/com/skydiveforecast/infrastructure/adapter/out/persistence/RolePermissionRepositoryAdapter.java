@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.out.persistence;
 
-import com.skydiveforecast.domain.model.RolePermissionEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.RolePermissionEntity;
 import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

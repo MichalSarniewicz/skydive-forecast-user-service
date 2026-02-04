@@ -1,7 +1,7 @@
 package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
-import com.skydiveforecast.domain.model.RoleEntity;
-import com.skydiveforecast.domain.model.UserRoleEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.RoleEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.UserRoleEntity;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRoleDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

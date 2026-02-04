@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.out.persistence;
 
-import com.skydiveforecast.domain.model.RoleEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.RoleEntity;
 import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

@@ -2,9 +2,9 @@ package com.skydiveforecast.domain.service;
 
 import com.skydiveforecast.application.service.RoleService;
 import com.skydiveforecast.application.service.UserRoleService;
-import com.skydiveforecast.domain.model.RoleEntity;
-import com.skydiveforecast.domain.model.UserEntity;
-import com.skydiveforecast.domain.model.UserRoleEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.RoleEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.UserEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.UserRoleEntity;
 import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import com.skydiveforecast.domain.port.out.UserRoleRepositoryPort;

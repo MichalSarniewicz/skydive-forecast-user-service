@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.out.persistence;
 
-import com.skydiveforecast.domain.model.PermissionEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.PermissionEntity;
 import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

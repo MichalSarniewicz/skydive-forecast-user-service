@@ -1,7 +1,7 @@
 package com.skydiveforecast.application.service;
 
 import com.skydiveforecast.domain.exception.BusinessRuleException;
-import com.skydiveforecast.domain.model.RoleEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.RoleEntity;
 import com.skydiveforecast.domain.port.in.AddRoleUseCase;
 import com.skydiveforecast.domain.port.in.DeleteRoleUseCase;
 import com.skydiveforecast.domain.port.in.GetAllRolesUseCase;

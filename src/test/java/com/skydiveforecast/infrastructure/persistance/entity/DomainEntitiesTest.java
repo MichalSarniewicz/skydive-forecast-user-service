@@ -1,4 +1,4 @@
-package com.skydiveforecast.domain.model;
+package com.skydiveforecast.infrastructure.persistance.entity;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

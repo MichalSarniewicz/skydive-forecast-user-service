@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
-import com.skydiveforecast.domain.model.PermissionEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.PermissionEntity;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreatePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.PermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UpdatePermissionDto;

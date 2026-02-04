@@ -1,9 +1,9 @@
 package com.skydiveforecast.application;
 
 import com.skydiveforecast.application.service.RolePermissionService;
-import com.skydiveforecast.domain.model.PermissionEntity;
-import com.skydiveforecast.domain.model.RoleEntity;
-import com.skydiveforecast.domain.model.RolePermissionEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.PermissionEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.RoleEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.RolePermissionEntity;
 import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
 import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
 import com.skydiveforecast.domain.port.out.RoleRepositoryPort;

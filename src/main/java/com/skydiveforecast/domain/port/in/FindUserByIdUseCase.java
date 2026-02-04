@@ -1,6 +1,6 @@
 package com.skydiveforecast.domain.port.in;
 
-import com.skydiveforecast.domain.model.UserEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.UserEntity;
 
 public interface FindUserByIdUseCase {
 

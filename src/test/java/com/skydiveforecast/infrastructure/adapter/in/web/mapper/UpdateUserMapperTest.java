@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
-import com.skydiveforecast.domain.model.UserEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.UserEntity;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UpdateUserDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

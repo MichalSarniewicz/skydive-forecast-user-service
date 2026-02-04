@@ -1,7 +1,7 @@
 package com.skydiveforecast.application;
 
 import com.skydiveforecast.application.service.PermissionService;
-import com.skydiveforecast.domain.model.PermissionEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.PermissionEntity;
 import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
 import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreatePermissionDto;

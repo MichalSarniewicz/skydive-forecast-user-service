@@ -1,7 +1,7 @@
 package com.skydiveforecast.application.service;
 
 import com.skydiveforecast.domain.exception.ValidationException;
-import com.skydiveforecast.domain.model.UserEntity;
+import com.skydiveforecast.infrastructure.persistance.entity.UserEntity;
 import com.skydiveforecast.domain.port.in.*;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import com.skydiveforecast.domain.service.validation.PasswordValidatorService;
