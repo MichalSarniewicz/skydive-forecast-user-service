@@ -1,29 +1,22 @@
 package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
-import com.skydiveforecast.infrastructure.persistance.entity.PermissionEntity;
+import com.skydiveforecast.domain.model.Permission;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreatePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.PermissionDto;
-import com.skydiveforecast.infrastructure.adapter.in.web.dto.UpdatePermissionDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface PermissionMapper {
 
-    PermissionDto toDto(PermissionEntity entity);
+    PermissionDto toDto(Permission domain);
 
-    List<PermissionDto> toDtoList(List<PermissionEntity> entities);
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    PermissionEntity toEntity(CreatePermissionDto dto);
+    List<PermissionDto> toDtoList(List<Permission> domains);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    void updateEntityFromDto(UpdatePermissionDto dto, @MappingTarget PermissionEntity entity);
+    Permission toDomain(CreatePermissionDto dto);
 }

@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.out.persistence;
 
-import com.skydiveforecast.infrastructure.persistance.entity.RolePermissionEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.RolePermissionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

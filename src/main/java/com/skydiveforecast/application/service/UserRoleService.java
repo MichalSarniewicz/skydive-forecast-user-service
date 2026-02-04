@@ -1,8 +1,8 @@
 package com.skydiveforecast.application.service;
 
-import com.skydiveforecast.infrastructure.persistance.entity.RoleEntity;
-import com.skydiveforecast.infrastructure.persistance.entity.UserEntity;
-import com.skydiveforecast.infrastructure.persistance.entity.UserRoleEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
 import com.skydiveforecast.domain.port.in.AssignRoleToUserUseCase;
 import com.skydiveforecast.domain.port.in.GetAllUserRolesUseCase;
 import com.skydiveforecast.domain.port.in.GetUserRolesUseCase;

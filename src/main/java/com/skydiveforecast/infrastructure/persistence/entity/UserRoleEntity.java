@@ -1,4 +1,4 @@
-package com.skydiveforecast.infrastructure.persistance.entity;
+package com.skydiveforecast.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

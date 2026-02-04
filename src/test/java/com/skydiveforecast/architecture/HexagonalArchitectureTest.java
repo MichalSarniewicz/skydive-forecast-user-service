@@ -12,6 +12,27 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 class HexagonalArchitectureTest {
 
     @ArchTest
+    static final ArchRule domainModelsShouldNotDependOnInfrastructure =
+            noClasses()
+                    .that().resideInAPackage("..domain.model..")
+                    .should().dependOnClassesThat()
+                    .resideInAPackage("..infrastructure..");
+
+    @ArchTest
+    static final ArchRule domainModelsShouldNotDependOnApplication =
+            noClasses()
+                    .that().resideInAPackage("..domain.model..")
+                    .should().dependOnClassesThat()
+                    .resideInAPackage("..application..");
+
+    @ArchTest
+    static final ArchRule domainModelsShouldNotDependOnSpring =
+            noClasses()
+                    .that().resideInAPackage("..domain.model..")
+                    .should().dependOnClassesThat()
+                    .resideInAnyPackage("org.springframework..");
+
+    @ArchTest
     static final ArchRule portsShouldBeInterfaces =
             classes()
                     .that().resideInAPackage("..domain.port..")
@@ -27,5 +48,5 @@ class HexagonalArchitectureTest {
     static final ArchRule jpaEntitiesShouldOnlyBeInPersistence =
             classes()
                     .that().haveSimpleNameEndingWith("Entity")
-                    .should().resideInAPackage("..infrastructure.persistance.entity..");
+                    .should().resideInAPackage("..infrastructure.persistence.entity..");
 }

@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
-import com.skydiveforecast.infrastructure.persistance.entity.RoleEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RoleDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

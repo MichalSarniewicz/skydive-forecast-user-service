@@ -1,8 +1,8 @@
 package com.skydiveforecast.infrastructure.security;
 
-import com.skydiveforecast.infrastructure.persistance.entity.RoleEntity;
-import com.skydiveforecast.infrastructure.persistance.entity.UserEntity;
-import com.skydiveforecast.infrastructure.persistance.entity.UserRoleEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package com.skydiveforecast.domain.port.out;
 
-import com.skydiveforecast.infrastructure.persistance.entity.UserRoleEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
 
 import java.util.List;
 import java.util.Optional;

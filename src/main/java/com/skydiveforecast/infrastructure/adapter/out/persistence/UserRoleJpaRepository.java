@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.out.persistence;
 
-import com.skydiveforecast.infrastructure.persistance.entity.UserRoleEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

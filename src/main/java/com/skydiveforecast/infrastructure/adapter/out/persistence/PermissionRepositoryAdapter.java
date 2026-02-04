@@ -1,7 +1,8 @@
 package com.skydiveforecast.infrastructure.adapter.out.persistence;
 
-import com.skydiveforecast.infrastructure.persistance.entity.PermissionEntity;
+import com.skydiveforecast.domain.model.Permission;
 import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
+import com.skydiveforecast.infrastructure.persistence.mapper.PermissionEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -14,25 +15,26 @@ import java.util.Set;
 public class PermissionRepositoryAdapter implements PermissionRepositoryPort {
 
     private final PermissionJpaRepository jpaRepository;
+    private final PermissionEntityMapper mapper;
 
     @Override
-    public PermissionEntity save(PermissionEntity permission) {
-        return jpaRepository.save(permission);
+    public Permission save(Permission permission) {
+        return mapper.toDomain(jpaRepository.save(mapper.toEntity(permission)));
     }
 
     @Override
-    public Optional<PermissionEntity> findById(Long id) {
-        return jpaRepository.findById(id);
+    public Optional<Permission> findById(Long id) {
+        return jpaRepository.findById(id).map(mapper::toDomain);
     }
 
     @Override
-    public Optional<PermissionEntity> findByCode(String code) {
-        return jpaRepository.findByCode(code);
+    public Optional<Permission> findByCode(String code) {
+        return jpaRepository.findByCode(code).map(mapper::toDomain);
     }
 
     @Override
-    public List<PermissionEntity> findAll() {
-        return jpaRepository.findAll();
+    public List<Permission> findAll() {
+        return mapper.toDomainList(jpaRepository.findAll());
     }
 
     @Override
@@ -46,7 +48,7 @@ public class PermissionRepositoryAdapter implements PermissionRepositoryPort {
     }
 
     @Override
-    public List<PermissionEntity> findByIdIn(Set<Long> ids) {
-        return jpaRepository.findByIdIn(ids);
+    public List<Permission> findByIdIn(Set<Long> ids) {
+        return mapper.toDomainList(jpaRepository.findByIdIn(ids));
     }
 }

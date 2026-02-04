@@ -1,6 +1,6 @@
 package com.skydiveforecast.application.service;
 
-import com.skydiveforecast.infrastructure.persistance.entity.PermissionEntity;
+import com.skydiveforecast.domain.model.Permission;
 import com.skydiveforecast.domain.port.in.*;
 import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
 import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
@@ -38,17 +38,17 @@ public class PermissionService implements GetAllPermissionsUseCase, CreatePermis
     @Override
     @CacheEvict(value = PERMISSIONS_CACHE, allEntries = true)
     public PermissionDto createPermission(CreatePermissionDto createPermissionDto) {
-        PermissionEntity permission = permissionMapper.toEntity(createPermissionDto);
+        Permission permission = permissionMapper.toDomain(createPermissionDto);
         return permissionMapper.toDto(permissionRepository.save(permission));
     }
 
     @Override
     @CacheEvict(value = PERMISSIONS_CACHE, allEntries = true)
     public PermissionDto updatePermission(Long id, UpdatePermissionDto updatePermissionDto) {
-        PermissionEntity permission = permissionRepository.findById(id)
+        Permission permission = permissionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Permission not found with id: " + id));
-        permissionMapper.updateEntityFromDto(updatePermissionDto, permission);
-        return permissionMapper.toDto(permissionRepository.save(permission));
+        Permission updated = permission.withDescription(updatePermissionDto.getDescription());
+        return permissionMapper.toDto(permissionRepository.save(updated));
     }
 
     @Override

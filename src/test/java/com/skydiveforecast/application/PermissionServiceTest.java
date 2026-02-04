@@ -1,7 +1,7 @@
 package com.skydiveforecast.application;
 
 import com.skydiveforecast.application.service.PermissionService;
-import com.skydiveforecast.infrastructure.persistance.entity.PermissionEntity;
+import com.skydiveforecast.domain.model.Permission;
 import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
 import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreatePermissionDto;
@@ -43,10 +43,11 @@ class PermissionServiceTest {
     @DisplayName("Should get all permissions successfully")
     void getAllPermissions_Success() {
         // Arrange
-        PermissionEntity permission = new PermissionEntity();
-        permission.setId(1L);
-        permission.setCode("USER_READ");
-        permission.setDescription("Read users");
+        Permission permission = Permission.builder()
+                .id(1L)
+                .code("USER_READ")
+                .description("Read users")
+                .build();
         
         PermissionDto dto = PermissionDto.builder()
                 .id(1L)
@@ -74,14 +75,16 @@ class PermissionServiceTest {
         dto.setCode("USER_WRITE");
         dto.setDescription("Write users");
         
-        PermissionEntity entity = new PermissionEntity();
-        entity.setCode("USER_WRITE");
-        entity.setDescription("Write users");
+        Permission domain = Permission.builder()
+                .code("USER_WRITE")
+                .description("Write users")
+                .build();
         
-        PermissionEntity saved = new PermissionEntity();
-        saved.setId(1L);
-        saved.setCode("USER_WRITE");
-        saved.setDescription("Write users");
+        Permission saved = Permission.builder()
+                .id(1L)
+                .code("USER_WRITE")
+                .description("Write users")
+                .build();
         
         PermissionDto resultDto = PermissionDto.builder()
                 .id(1L)
@@ -89,8 +92,8 @@ class PermissionServiceTest {
                 .description("Write users")
                 .build();
         
-        when(permissionMapper.toEntity(dto)).thenReturn(entity);
-        when(permissionRepository.save(entity)).thenReturn(saved);
+        when(permissionMapper.toDomain(dto)).thenReturn(domain);
+        when(permissionRepository.save(domain)).thenReturn(saved);
         when(permissionMapper.toDto(saved)).thenReturn(resultDto);
 
         // Act
@@ -99,7 +102,7 @@ class PermissionServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals("USER_WRITE", result.getCode());
-        verify(permissionRepository).save(entity);
+        verify(permissionRepository).save(domain);
     }
 
     @Test
@@ -111,8 +114,13 @@ class PermissionServiceTest {
         dto.setCode("USER_UPDATE");
         dto.setDescription("Update users");
         
-        PermissionEntity existing = new PermissionEntity();
-        existing.setId(id);
+        Permission existing = Permission.builder()
+                .id(id)
+                .code("USER_UPDATE")
+                .description("Old description")
+                .build();
+        
+        Permission updated = existing.withDescription("Update users");
         
         PermissionDto resultDto = PermissionDto.builder()
                 .id(id)
@@ -121,16 +129,15 @@ class PermissionServiceTest {
                 .build();
         
         when(permissionRepository.findById(id)).thenReturn(Optional.of(existing));
-        when(permissionRepository.save(existing)).thenReturn(existing);
-        when(permissionMapper.toDto(existing)).thenReturn(resultDto);
+        when(permissionRepository.save(any())).thenReturn(updated);
+        when(permissionMapper.toDto(updated)).thenReturn(resultDto);
 
         // Act
         PermissionDto result = permissionService.updatePermission(id, dto);
 
         // Assert
         assertNotNull(result);
-        verify(permissionMapper).updateEntityFromDto(dto, existing);
-        verify(permissionRepository).save(existing);
+        verify(permissionRepository).save(any());
     }
 
     @Test
@@ -153,8 +160,7 @@ class PermissionServiceTest {
     void deletePermission_Success() {
         // Arrange
         Long id = 1L;
-        PermissionEntity permission = new PermissionEntity();
-        permission.setId(id);
+        Permission permission = Permission.builder().id(id).build();
         
         when(permissionRepository.findById(id)).thenReturn(Optional.of(permission));
 
