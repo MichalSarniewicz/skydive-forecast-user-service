@@ -1,19 +1,19 @@
 package com.skydiveforecast.domain.port.out;
 
-import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
+import com.skydiveforecast.domain.model.Role;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface RoleRepositoryPort {
 
-    RoleEntity save(RoleEntity role);
+    Role save(Role role);
 
-    Optional<RoleEntity> findById(Long id);
+    Optional<Role> findById(Long id);
 
-    Optional<RoleEntity> findByName(String name);
+    Optional<Role> findByName(String name);
 
-    List<RoleEntity> findAll();
+    List<Role> findAll();
 
     boolean existsByName(String name);
 

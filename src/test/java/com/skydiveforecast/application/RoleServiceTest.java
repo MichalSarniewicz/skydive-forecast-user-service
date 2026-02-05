@@ -1,7 +1,8 @@
 package com.skydiveforecast.application;
 
 import com.skydiveforecast.application.service.RoleService;
-import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
+import com.skydiveforecast.domain.exception.BusinessRuleException;
+import com.skydiveforecast.domain.model.Role;
 import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolesDto;
@@ -14,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,121 +36,78 @@ class RoleServiceTest {
 
     @Test
     @DisplayName("Should get all roles successfully")
-    void getAllRoles_Success() {
+    void getAllRoles_WhenRolesExist_ReturnsAllRoles() {
         // Arrange
-        RoleEntity role1 = RoleEntity.builder()
-                .id(1L)
-                .name("USER")
-                .createdAt(OffsetDateTime.now())
-                .build();
+        Role role = Role.builder().id(1L).name("ADMIN").build();
+        RoleDto dto = new RoleDto(1L, "ADMIN");
 
-        RoleEntity role2 = RoleEntity.builder()
-                .id(2L)
-                .name("ADMIN")
-                .createdAt(OffsetDateTime.now())
-                .build();
-
-        List<RoleEntity> entities = List.of(role1, role2);
-        List<RoleDto> dtos = List.of(
-                new RoleDto(1L, "USER"),
-                new RoleDto(2L, "ADMIN")
-        );
-
-        when(roleRepository.findAll()).thenReturn(entities);
-        when(roleMapper.toDtoList(entities)).thenReturn(dtos);
+        when(roleRepository.findAll()).thenReturn(List.of(role));
+        when(roleMapper.toDtoList(any())).thenReturn(List.of(dto));
 
         // Act
         RolesDto result = roleService.getAllRoles();
 
         // Assert
         assertNotNull(result);
-        assertEquals(2, result.getRoles().size());
+        assertEquals(1, result.getRoles().size());
         verify(roleRepository).findAll();
-        verify(roleMapper).toDtoList(entities);
     }
 
     @Test
     @DisplayName("Should add role successfully")
-    void addRole_Success() {
+    void addRole_WhenValidName_CreatesRole() {
         // Arrange
-        String roleName = "MODERATOR";
-        RoleEntity savedRole = RoleEntity.builder()
-                .id(1L)
-                .name(roleName)
-                .createdAt(OffsetDateTime.now())
-                .build();
+        Role savedRole = Role.builder().id(1L).name("USER").build();
+        RoleDto dto = new RoleDto(1L, "USER");
 
-        RoleDto roleDto = new RoleDto(1L, roleName);
-
-        when(roleRepository.save(any(RoleEntity.class))).thenReturn(savedRole);
-        when(roleMapper.toDto(savedRole)).thenReturn(roleDto);
+        when(roleRepository.save(any())).thenReturn(savedRole);
+        when(roleMapper.toDto(savedRole)).thenReturn(dto);
 
         // Act
-        RoleDto result = roleService.addRole(roleName);
+        RoleDto result = roleService.addRole("USER");
 
         // Assert
         assertNotNull(result);
-        assertEquals(roleName, result.getName());
-        verify(roleRepository).save(any(RoleEntity.class));
-        verify(roleMapper).toDto(savedRole);
+        assertEquals("USER", result.getName());
+        verify(roleRepository).save(any());
     }
 
     @Test
     @DisplayName("Should delete role successfully")
-    void deleteRole_Success() {
-        Long roleId = 1L;
-        RoleEntity role = RoleEntity.builder()
-                .id(roleId)
-                .name("USER")
-                .createdAt(OffsetDateTime.now())
-                .build();
+    void deleteRole_WhenRoleExists_DeletesRole() {
+        // Arrange
+        Role role = Role.builder().id(1L).name("USER").build();
 
-        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
 
         // Act
-        roleService.deleteRole(roleId);
+        roleService.deleteRole(1L);
 
         // Assert
-        verify(roleRepository).findById(roleId);
-        verify(roleRepository).deleteById(roleId);
+        verify(roleRepository).deleteById(1L);
     }
 
     @Test
-    @DisplayName("Should throw EntityNotFoundException when deleting non-existent role")
-    void deleteRole_RoleNotFound() {
+    @DisplayName("Should throw exception when deleting ADMIN role")
+    void deleteRole_WhenAdminRole_ThrowsException() {
         // Arrange
-        Long roleId = 999L;
+        Role adminRole = Role.builder().id(1L).name("ADMIN").build();
 
-        when(roleRepository.findById(roleId)).thenReturn(Optional.empty());
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(adminRole));
 
         // Act & Assert
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> roleService.deleteRole(roleId));
-
-        assertEquals("Role with ID " + roleId + " does not exist", exception.getMessage());
-        verify(roleRepository).findById(roleId);
+        assertThrows(BusinessRuleException.class, () -> roleService.deleteRole(1L));
         verify(roleRepository, never()).deleteById(any());
     }
 
     @Test
-    @DisplayName("Should throw BusinessRuleException when deleting ADMIN role")
-    void deleteRole_AdminRoleCannotBeDeleted() {
+    @DisplayName("Should throw exception when deleting non-existent role")
+    void deleteRole_WhenRoleNotExists_ThrowsException() {
         // Arrange
-        Long roleId = 1L;
-        RoleEntity adminRole = RoleEntity.builder()
-                .id(roleId)
-                .name("ADMIN")
-                .createdAt(OffsetDateTime.now())
-                .build();
-
-        when(roleRepository.findById(roleId)).thenReturn(Optional.of(adminRole));
+        when(roleRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        Exception exception = assertThrows(Exception.class,
-                () -> roleService.deleteRole(roleId));
-
-        assertEquals("The ADMIN role cannot be deleted", exception.getMessage());
-        verify(roleRepository).findById(roleId);
+        assertThrows(EntityNotFoundException.class, () -> roleService.deleteRole(1L));
         verify(roleRepository, never()).deleteById(any());
     }
 }

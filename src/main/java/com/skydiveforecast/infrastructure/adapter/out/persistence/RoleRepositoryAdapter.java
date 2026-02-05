@@ -1,7 +1,8 @@
 package com.skydiveforecast.infrastructure.adapter.out.persistence;
 
-import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
+import com.skydiveforecast.domain.model.Role;
 import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
+import com.skydiveforecast.infrastructure.persistence.mapper.RoleEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -13,25 +14,26 @@ import java.util.Optional;
 public class RoleRepositoryAdapter implements RoleRepositoryPort {
 
     private final RoleJpaRepository jpaRepository;
+    private final RoleEntityMapper mapper;
 
     @Override
-    public RoleEntity save(RoleEntity role) {
-        return jpaRepository.save(role);
+    public Role save(Role role) {
+        return mapper.toDomain(jpaRepository.save(mapper.toEntity(role)));
     }
 
     @Override
-    public Optional<RoleEntity> findById(Long id) {
-        return jpaRepository.findById(id);
+    public Optional<Role> findById(Long id) {
+        return jpaRepository.findById(id).map(mapper::toDomain);
     }
 
     @Override
-    public Optional<RoleEntity> findByName(String name) {
-        return jpaRepository.findByName(name);
+    public Optional<Role> findByName(String name) {
+        return jpaRepository.findByName(name).map(mapper::toDomain);
     }
 
     @Override
-    public List<RoleEntity> findAll() {
-        return jpaRepository.findAll();
+    public List<Role> findAll() {
+        return mapper.toDomainList(jpaRepository.findAll());
     }
 
     @Override

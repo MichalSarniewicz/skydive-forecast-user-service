@@ -1,6 +1,6 @@
 package com.skydiveforecast.application.service;
 
-import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
+import com.skydiveforecast.domain.model.Role;
 import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
 import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
 import com.skydiveforecast.domain.port.in.AssignRoleToUserUseCase;
@@ -14,6 +14,7 @@ import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateUserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRolesDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UserRoleMapper;
+import com.skydiveforecast.infrastructure.persistence.mapper.RoleEntityMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -35,6 +36,7 @@ public class UserRoleService implements GetAllUserRolesUseCase, GetUserRolesUseC
     private final UserRoleMapper userRoleMapper;
     private final UserRepositoryPort userRepository;
     private final RoleRepositoryPort roleRepository;
+    private final RoleEntityMapper roleEntityMapper;
 
     @Override
     @Cacheable(value = USER_ROLES_CACHE, key = "'all'")
@@ -60,7 +62,7 @@ public class UserRoleService implements GetAllUserRolesUseCase, GetUserRolesUseC
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
 
-        RoleEntity role = roleRepository.findById(roleId)
+        Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new EntityNotFoundException("Role not found with ID: " + roleId));
 
         boolean roleAlreadyAssigned = userRoleRepository.findByUserId(userId).stream()
@@ -70,7 +72,7 @@ public class UserRoleService implements GetAllUserRolesUseCase, GetUserRolesUseC
         }
         UserRoleEntity entity = UserRoleEntity.builder()
                 .user(user)
-                .role(role)
+                .role(roleEntityMapper.toEntity(role))
                 .build();
 
         return userRoleMapper.toDto(userRoleRepository.save(entity));

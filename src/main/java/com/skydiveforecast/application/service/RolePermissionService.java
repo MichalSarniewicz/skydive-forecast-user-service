@@ -1,7 +1,7 @@
 package com.skydiveforecast.application.service;
 
 import com.skydiveforecast.domain.model.Permission;
-import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
+import com.skydiveforecast.domain.model.Role;
 import com.skydiveforecast.infrastructure.persistence.entity.RolePermissionEntity;
 import com.skydiveforecast.domain.port.in.*;
 import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
@@ -12,6 +12,7 @@ import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateRolePermissio
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionsDto;
 import com.skydiveforecast.infrastructure.persistence.mapper.PermissionEntityMapper;
+import com.skydiveforecast.infrastructure.persistence.mapper.RoleEntityMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -44,6 +45,7 @@ public class RolePermissionService implements
     private final RoleRepositoryPort roleRepository;
     private final PermissionRepositoryPort permissionRepository;
     private final PermissionEntityMapper permissionEntityMapper;
+    private final RoleEntityMapper roleEntityMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -94,14 +96,14 @@ public class RolePermissionService implements
                 createRolePermissionDto.getPermissionId())) {
             throw new IllegalArgumentException("Role-Permission relationship already exists");
         }
-        RoleEntity role = roleRepository.findById(createRolePermissionDto.getRoleId())
+        Role role = roleRepository.findById(createRolePermissionDto.getRoleId())
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
         Permission permission = permissionRepository.findById(createRolePermissionDto.getPermissionId())
                 .orElseThrow(() -> new IllegalArgumentException("Permission not found"));
 
         RolePermissionEntity entity = RolePermissionEntity.builder()
-                .role(role)
+                .role(roleEntityMapper.toEntity(role))
                 .permission(permissionEntityMapper.toEntity(permission))
                 .build();
 
@@ -112,7 +114,7 @@ public class RolePermissionService implements
     @Override
     @CacheEvict(value = {ROLE_PERMISSIONS_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public List<RolePermissionDto> assignPermissionsToRole(AssignPermissionsToRoleDto assignPermissionsToRoleDto) {
-        RoleEntity role = roleRepository.findById(assignPermissionsToRoleDto.getRoleId())
+        Role role = roleRepository.findById(assignPermissionsToRoleDto.getRoleId())
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
         List<Permission> permissionsList = permissionRepository.findByIdIn(assignPermissionsToRoleDto.getPermissionIds());
@@ -128,7 +130,7 @@ public class RolePermissionService implements
         // Create new role-permission relationships
         List<RolePermissionEntity> entities = permissions.stream()
                 .map(permission -> RolePermissionEntity.builder()
-                        .role(role)
+                        .role(roleEntityMapper.toEntity(role))
                         .permission(permissionEntityMapper.toEntity(permission))
                         .build())
                 .collect(Collectors.toList());

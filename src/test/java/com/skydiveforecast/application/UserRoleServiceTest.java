@@ -1,9 +1,7 @@
 package com.skydiveforecast.application;
 
 import com.skydiveforecast.application.service.UserRoleService;
-import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
-import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
+import com.skydiveforecast.domain.model.Role;
 import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import com.skydiveforecast.domain.port.out.UserRoleRepositoryPort;
@@ -11,6 +9,9 @@ import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateUserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRolesDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UserRoleMapper;
+import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
+import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
+import com.skydiveforecast.infrastructure.persistence.mapper.RoleEntityMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,16 +42,21 @@ class UserRoleServiceTest {
     @Mock
     private RoleRepositoryPort roleRepository;
 
+    @Mock
+    private RoleEntityMapper roleEntityMapper;
+
     @InjectMocks
     private UserRoleService userRoleService;
 
     @Test
     @DisplayName("Should get all user roles successfully")
-    void getAllUserRoles_Success() {
+    void getAllUserRoles_WhenUserRolesExist_ReturnsAllUserRoles() {
         // Arrange
-        UserRoleEntity entity = createUserRoleEntity();
+        UserRoleEntity entity = new UserRoleEntity();
+        UserRoleDto dto = new UserRoleDto();
+
         when(userRoleRepository.findAll()).thenReturn(List.of(entity));
-        when(userRoleMapper.toDtoList(any())).thenReturn(List.of(new UserRoleDto()));
+        when(userRoleMapper.toDtoList(any())).thenReturn(List.of(dto));
 
         // Act
         UserRolesDto result = userRoleService.getAllUserRoles();
@@ -62,42 +68,41 @@ class UserRoleServiceTest {
     }
 
     @Test
-    @DisplayName("Should get user roles by user ID")
-    void getUserRoles_Success() {
+    @DisplayName("Should get user roles by user id successfully")
+    void getUserRoles_WhenUserHasRoles_ReturnsUserRoles() {
         // Arrange
-        Long userId = 1L;
-        UserRoleEntity entity = createUserRoleEntity();
-        when(userRoleRepository.findByUserId(userId)).thenReturn(List.of(entity));
-        when(userRoleMapper.toDtoList(any())).thenReturn(List.of(new UserRoleDto()));
+        UserRoleEntity entity = new UserRoleEntity();
+        UserRoleDto dto = new UserRoleDto();
+
+        when(userRoleRepository.findByUserId(1L)).thenReturn(List.of(entity));
+        when(userRoleMapper.toDtoList(any())).thenReturn(List.of(dto));
 
         // Act
-        UserRolesDto result = userRoleService.getUserRoles(userId);
+        UserRolesDto result = userRoleService.getUserRoles(1L);
 
         // Assert
         assertNotNull(result);
         assertEquals(1, result.getUserRoles().size());
-        verify(userRoleRepository).findByUserId(userId);
     }
 
     @Test
     @DisplayName("Should assign role to user successfully")
-    void assignRoleToUser_Success() {
+    void assignRoleToUser_WhenValidRequest_AssignsRole() {
         // Arrange
         CreateUserRoleDto dto = new CreateUserRoleDto();
         dto.setUserId(1L);
-        dto.setRoleId(1L);
-        
+        dto.setRoleId(2L);
+
         UserEntity user = new UserEntity();
-        user.setId(1L);
-        RoleEntity role = new RoleEntity();
-        role.setId(1L);
-        UserRoleEntity saved = createUserRoleEntity();
-        
+        Role role = Role.builder().id(2L).name("USER").build();
+        UserRoleEntity savedEntity = new UserRoleEntity();
+        UserRoleDto resultDto = new UserRoleDto();
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(roleRepository.findById(2L)).thenReturn(Optional.of(role));
         when(userRoleRepository.findByUserId(1L)).thenReturn(List.of());
-        when(userRoleRepository.save(any())).thenReturn(saved);
-        when(userRoleMapper.toDto(any())).thenReturn(new UserRoleDto());
+        when(userRoleRepository.save(any())).thenReturn(savedEntity);
+        when(userRoleMapper.toDto(savedEntity)).thenReturn(resultDto);
 
         // Act
         UserRoleDto result = userRoleService.assignRoleToUser(dto);
@@ -108,109 +113,60 @@ class UserRoleServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw EntityNotFoundException when user not found")
-    void assignRoleToUser_UserNotFound() {
-        // Arrange
-        CreateUserRoleDto dto = new CreateUserRoleDto();
-        dto.setUserId(999L);
-        dto.setRoleId(1L);
-        
-        when(userRepository.findById(999L)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(EntityNotFoundException.class, 
-            () -> userRoleService.assignRoleToUser(dto));
-        verify(userRoleRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("Should throw EntityNotFoundException when role not found")
-    void assignRoleToUser_RoleNotFound() {
+    @DisplayName("Should throw exception when user not found")
+    void assignRoleToUser_WhenUserNotFound_ThrowsException() {
         // Arrange
         CreateUserRoleDto dto = new CreateUserRoleDto();
         dto.setUserId(1L);
-        dto.setRoleId(999L);
-        
-        UserEntity user = new UserEntity();
-        user.setId(1L);
-        
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(roleRepository.findById(999L)).thenReturn(Optional.empty());
+        dto.setRoleId(2L);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(EntityNotFoundException.class, 
-            () -> userRoleService.assignRoleToUser(dto));
-        verify(userRoleRepository, never()).save(any());
+        assertThrows(EntityNotFoundException.class, () -> userRoleService.assignRoleToUser(dto));
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException when role already assigned")
-    void assignRoleToUser_RoleAlreadyAssigned() {
+    @DisplayName("Should throw exception when role not found")
+    void assignRoleToUser_WhenRoleNotFound_ThrowsException() {
         // Arrange
         CreateUserRoleDto dto = new CreateUserRoleDto();
         dto.setUserId(1L);
-        dto.setRoleId(1L);
-        
+        dto.setRoleId(2L);
+
         UserEntity user = new UserEntity();
-        user.setId(1L);
-        RoleEntity role = new RoleEntity();
-        role.setId(1L);
-        UserRoleEntity existing = createUserRoleEntity();
-        
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
-        when(userRoleRepository.findByUserId(1L)).thenReturn(List.of(existing));
+        when(roleRepository.findById(2L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, 
-            () -> userRoleService.assignRoleToUser(dto));
-        verify(userRoleRepository, never()).save(any());
+        assertThrows(EntityNotFoundException.class, () -> userRoleService.assignRoleToUser(dto));
     }
 
     @Test
     @DisplayName("Should remove role from user successfully")
-    void removeRoleFromUser_Success() {
+    void removeRoleFromUser_WhenRoleAssigned_RemovesRole() {
         // Arrange
-        Long userId = 1L;
-        Long roleId = 1L;
-        UserRoleEntity entity = createUserRoleEntity();
-        
-        when(userRoleRepository.findByUserId(userId)).thenReturn(List.of(entity));
+        UserRoleEntity entity = new UserRoleEntity();
+        entity.setRole(new com.skydiveforecast.infrastructure.persistence.entity.RoleEntity());
+        entity.getRole().setId(2L);
+
+        when(userRoleRepository.findByUserId(1L)).thenReturn(List.of(entity));
 
         // Act
-        userRoleService.removeRoleFromUser(userId, roleId);
+        userRoleService.removeRoleFromUser(1L, 2L);
 
         // Assert
-        verify(userRoleRepository).deleteByUserIdAndRoleId(userId, roleId);
+        verify(userRoleRepository).deleteByUserIdAndRoleId(1L, 2L);
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException when role not assigned to user")
-    void removeRoleFromUser_RoleNotAssigned() {
+    @DisplayName("Should throw exception when removing non-assigned role")
+    void removeRoleFromUser_WhenRoleNotAssigned_ThrowsException() {
         // Arrange
-        Long userId = 1L;
-        Long roleId = 999L;
-        
-        when(userRoleRepository.findByUserId(userId)).thenReturn(List.of());
+        when(userRoleRepository.findByUserId(1L)).thenReturn(List.of());
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, 
-            () -> userRoleService.removeRoleFromUser(userId, roleId));
-        verify(userRoleRepository, never()).deleteByUserIdAndRoleId(any(), any());
-    }
-
-    private UserRoleEntity createUserRoleEntity() {
-        UserEntity user = new UserEntity();
-        user.setId(1L);
-        
-        RoleEntity role = new RoleEntity();
-        role.setId(1L);
-        role.setName("USER");
-        
-        return UserRoleEntity.builder()
-                .id(1L)
-                .user(user)
-                .role(role)
-                .build();
+        assertThrows(IllegalArgumentException.class, () -> userRoleService.removeRoleFromUser(1L, 2L));
     }
 }

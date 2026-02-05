@@ -1,7 +1,7 @@
 package com.skydiveforecast.application.service;
 
 import com.skydiveforecast.domain.exception.BusinessRuleException;
-import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
+import com.skydiveforecast.domain.model.Role;
 import com.skydiveforecast.domain.port.in.AddRoleUseCase;
 import com.skydiveforecast.domain.port.in.DeleteRoleUseCase;
 import com.skydiveforecast.domain.port.in.GetAllRolesUseCase;
@@ -31,31 +31,31 @@ public class RoleService implements GetAllRolesUseCase, AddRoleUseCase, DeleteRo
     @Override
     @Cacheable(value = ROLES_CACHE, key = "'all'")
     public RolesDto getAllRoles() {
-        List<RoleEntity> entities = roleRepository.findAll();
-        return new RolesDto(roleMapper.toDtoList(entities));
+        List<Role> roles = roleRepository.findAll();
+        return new RolesDto(roleMapper.toDtoList(roles));
     }
 
     @Override
     @CacheEvict(value = ROLES_CACHE, allEntries = true)
     public RoleDto addRole(String roleName) {
-        RoleEntity roleEntity = RoleEntity.builder()
+        Role role = Role.builder()
                 .name(roleName)
                 .createdAt(OffsetDateTime.now())
                 .build();
 
-        RoleEntity savedRole = roleRepository.save(roleEntity);
+        Role savedRole = roleRepository.save(role);
         return roleMapper.toDto(savedRole);
     }
 
     @Override
     @CacheEvict(value = ROLES_CACHE, allEntries = true)
     public void deleteRole(Long roleId) {
-        RoleEntity roleEntity = roleRepository.findById(roleId)
+        Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new EntityNotFoundException("Role with ID " + roleId + " does not exist"));
 
-        if (ADMIN_ROLE.equals(roleEntity.getName())) {
+        if (ADMIN_ROLE.equals(role.name())) {
             throw new BusinessRuleException("The ADMIN role cannot be deleted");
         }
-        roleRepository.deleteById(roleEntity.getId());
+        roleRepository.deleteById(role.id());
     }
 }
