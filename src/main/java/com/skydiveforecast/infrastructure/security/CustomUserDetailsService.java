@@ -1,9 +1,8 @@
 package com.skydiveforecast.infrastructure.security;
 
-import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
-import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
+import com.skydiveforecast.domain.model.User;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
+import com.skydiveforecast.domain.port.out.UserRoleRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,23 +20,23 @@ import java.util.stream.Collectors;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepositoryPort userRepository;
+    private final UserRoleRepositoryPort userRoleRepository;
 
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
-                .map(UserRoleEntity::getRole)
-                .map(RoleEntity::getName)
+        Set<String> roleNames = userRoleRepository.findRoleNamesByUserId(user.id());
+        List<SimpleGrantedAuthority> authorities = roleNames.stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                 .collect(Collectors.toList());
 
         return new CustomUserPrincipal(
-                user.getId(),
-                user.getEmail(),
-                user.getPasswordHash(),
+                user.id(),
+                user.email(),
+                user.passwordHash(),
                 user.isActive(),
                 authorities
         );

@@ -1,21 +1,21 @@
 package com.skydiveforecast.domain.port.out;
 
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
+import com.skydiveforecast.domain.model.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserRepositoryPort {
 
-    UserEntity save(UserEntity user);
+    User save(User user);
 
-    Optional<UserEntity> findById(Long id);
+    Optional<User> findById(Long id);
 
-    Optional<UserEntity> findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
-    List<UserEntity> findAll();
+    List<User> findAll();
 
-    List<UserEntity> findAllWithRoles();
+    List<User> findAllWithRoles();
 
     boolean existsByEmail(String email);
 

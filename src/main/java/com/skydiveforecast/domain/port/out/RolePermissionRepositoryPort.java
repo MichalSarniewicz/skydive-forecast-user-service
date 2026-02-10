@@ -1,6 +1,6 @@
 package com.skydiveforecast.domain.port.out;
 
-import com.skydiveforecast.infrastructure.persistence.entity.RolePermissionEntity;
+import com.skydiveforecast.domain.model.RolePermission;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,15 +8,15 @@ import java.util.Set;
 
 public interface RolePermissionRepositoryPort {
 
-    RolePermissionEntity save(RolePermissionEntity rolePermission);
+    RolePermission save(RolePermission rolePermission);
 
-    Optional<RolePermissionEntity> findById(Long id);
+    Optional<RolePermission> findById(Long id);
 
-    List<RolePermissionEntity> findByRoleId(Long roleId);
+    List<RolePermission> findByRoleId(Long roleId);
 
-    List<RolePermissionEntity> findByPermissionId(Long permissionId);
+    List<RolePermission> findByPermissionId(Long permissionId);
 
-    List<RolePermissionEntity> findAll();
+    List<RolePermission> findAll();
 
     void deleteById(Long id);
 
@@ -32,7 +32,7 @@ public interface RolePermissionRepositoryPort {
 
     boolean existsByRoleIdAndPermissionId(Long roleId, Long permissionId);
 
-    List<RolePermissionEntity> saveAll(List<RolePermissionEntity> entities);
+    List<RolePermission> saveAll(List<RolePermission> entities);
 
-    void delete(RolePermissionEntity entity);
+    void delete(RolePermission entity);
 }

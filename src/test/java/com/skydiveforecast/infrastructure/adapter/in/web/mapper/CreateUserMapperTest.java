@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
+import com.skydiveforecast.domain.model.User;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateUserDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +19,8 @@ class CreateUserMapperTest {
     }
 
     @Test
-    @DisplayName("Should map CreateUserDto to UserEntity")
-    void toEntity_Success() {
+    @DisplayName("Should map CreateUserDto to User domain")
+    void toDomain_Success() {
         // Arrange
         CreateUserDto dto = new CreateUserDto();
         dto.setEmail("test@example.com");
@@ -29,33 +29,34 @@ class CreateUserMapperTest {
         dto.setPassword("Password123!");
 
         // Act
-        UserEntity entity = mapper.toEntity(dto);
+        User user = mapper.toDomain(dto);
 
         // Assert
-        assertNotNull(entity);
-        assertEquals("test@example.com", entity.getEmail());
-        assertEquals("John", entity.getFirstName());
-        assertEquals("Doe", entity.getLastName());
-        assertNull(entity.getId());
-        assertNull(entity.getPasswordHash());
+        assertNotNull(user);
+        assertEquals("test@example.com", user.email());
+        assertEquals("John", user.firstName());
+        assertEquals("Doe", user.lastName());
+        assertNull(user.id());
+        assertNull(user.passwordHash());
+        assertTrue(user.isActive());
     }
 
     @Test
     @DisplayName("Should handle null CreateUserDto")
-    void toEntity_NullDto() {
+    void toDomain_NullDto() {
         // Arrange
         CreateUserDto dto = null;
 
         // Act
-        UserEntity entity = mapper.toEntity(dto);
+        User user = mapper.toDomain(dto);
 
         // Assert
-        assertNull(entity);
+        assertNull(user);
     }
 
     @Test
     @DisplayName("Should map CreateUserDto with null fields")
-    void toEntity_NullFields() {
+    void toDomain_NullFields() {
         // Arrange
         CreateUserDto dto = new CreateUserDto();
         dto.setEmail(null);
@@ -63,12 +64,13 @@ class CreateUserMapperTest {
         dto.setLastName(null);
 
         // Act
-        UserEntity entity = mapper.toEntity(dto);
+        User user = mapper.toDomain(dto);
 
         // Assert
-        assertNotNull(entity);
-        assertNull(entity.getEmail());
-        assertNull(entity.getFirstName());
-        assertNull(entity.getLastName());
+        assertNotNull(user);
+        assertNull(user.email());
+        assertNull(user.firstName());
+        assertNull(user.lastName());
+        assertTrue(user.isActive());
     }
 }

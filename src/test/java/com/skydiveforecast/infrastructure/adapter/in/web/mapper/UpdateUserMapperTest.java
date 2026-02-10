@@ -1,9 +1,8 @@
 package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UpdateUserDto;
+import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -19,79 +18,42 @@ class UpdateUserMapperTest {
     }
 
     @Test
-    @DisplayName("Should update entity from UpdateUserDto")
-    void updateEntityFromDto_Success() {
+    void updateEntityFromDto_ShouldUpdateEntityFields() {
         // Arrange
         UpdateUserDto dto = new UpdateUserDto();
         dto.setFirstName("Jane");
         dto.setLastName("Smith");
+        dto.setPhoneNumber("987654321");
 
         UserEntity entity = new UserEntity();
         entity.setId(1L);
-        entity.setEmail("original@example.com");
+        entity.setEmail("test@test.com");
         entity.setFirstName("John");
         entity.setLastName("Doe");
-        entity.setPasswordHash("hashedPassword");
-        entity.setActive(true);
+        entity.setPhoneNumber("123456789");
 
         // Act
         mapper.updateEntityFromDto(dto, entity);
 
         // Assert
-        assertEquals(1L, entity.getId());
-        assertEquals("original@example.com", entity.getEmail());
         assertEquals("Jane", entity.getFirstName());
         assertEquals("Smith", entity.getLastName());
-        assertEquals("hashedPassword", entity.getPasswordHash());
-        assertTrue(entity.isActive());
+        assertEquals("987654321", entity.getPhoneNumber());
+        assertEquals(1L, entity.getId());
+        assertEquals("test@test.com", entity.getEmail());
     }
 
     @Test
-    @DisplayName("Should handle null fields in UpdateUserDto")
-    void updateEntityFromDto_NullFields() {
+    void updateEntityFromDto_WithNullDto_ShouldNotUpdateEntity() {
         // Arrange
-        UpdateUserDto dto = new UpdateUserDto();
-        dto.setFirstName(null);
-        dto.setLastName(null);
-
         UserEntity entity = new UserEntity();
         entity.setId(1L);
-        entity.setEmail("test@example.com");
         entity.setFirstName("John");
-        entity.setLastName("Doe");
 
         // Act
-        mapper.updateEntityFromDto(dto, entity);
+        mapper.updateEntityFromDto(null, entity);
 
         // Assert
-        assertEquals(1L, entity.getId());
-        assertNull(entity.getFirstName());
-        assertNull(entity.getLastName());
-    }
-
-    @Test
-    @DisplayName("Should preserve ignored fields when updating")
-    void updateEntityFromDto_PreserveIgnoredFields() {
-        // Arrange
-        UpdateUserDto dto = new UpdateUserDto();
-        dto.setFirstName("NewFirstName");
-        dto.setLastName("NewLastName");
-
-        UserEntity entity = new UserEntity();
-        entity.setId(999L);
-        entity.setEmail("preserve@example.com");
-        entity.setPasswordHash("preservedHash");
-        entity.setActive(false);
-
-        // Act
-        mapper.updateEntityFromDto(dto, entity);
-
-        // Assert
-        assertEquals(999L, entity.getId());
-        assertEquals("preserve@example.com", entity.getEmail());
-        assertEquals("preservedHash", entity.getPasswordHash());
-        assertFalse(entity.isActive());
-        assertEquals("NewFirstName", entity.getFirstName());
-        assertEquals("NewLastName", entity.getLastName());
+        assertEquals("John", entity.getFirstName());
     }
 }

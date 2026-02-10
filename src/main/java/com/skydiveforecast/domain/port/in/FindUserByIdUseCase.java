@@ -1,8 +1,8 @@
 package com.skydiveforecast.domain.port.in;
 
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
+import com.skydiveforecast.domain.model.User;
 
 public interface FindUserByIdUseCase {
 
-    UserEntity findUserById(Long userId);
+    User findUserById(Long userId);
 }

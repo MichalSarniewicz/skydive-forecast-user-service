@@ -3,13 +3,13 @@ package com.skydiveforecast.application;
 import com.skydiveforecast.application.service.RolePermissionService;
 import com.skydiveforecast.domain.model.Permission;
 import com.skydiveforecast.domain.model.Role;
+import com.skydiveforecast.domain.model.RolePermission;
 import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
 import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
 import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateRolePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.RolePermissionsDto;
-import com.skydiveforecast.infrastructure.persistence.entity.RolePermissionEntity;
 import com.skydiveforecast.infrastructure.persistence.mapper.PermissionEntityMapper;
 import com.skydiveforecast.infrastructure.persistence.mapper.RoleEntityMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -52,16 +52,13 @@ class RolePermissionServiceTest {
     @DisplayName("Should get all role permissions successfully")
     void getAllRolePermissions_WhenRolePermissionsExist_ReturnsAll() {
         // Arrange
-        RolePermissionEntity entity = new RolePermissionEntity();
-        entity.setId(1L);
-        entity.setRole(new com.skydiveforecast.infrastructure.persistence.entity.RoleEntity());
-        entity.getRole().setId(1L);
-        entity.getRole().setName("ADMIN");
-        entity.setPermission(new com.skydiveforecast.infrastructure.persistence.entity.PermissionEntity());
-        entity.getPermission().setId(1L);
-        entity.getPermission().setCode("USER_READ");
+        Role role = Role.builder().id(1L).name("ADMIN").build();
+        Permission permission = Permission.builder().id(1L).code("USER_READ").build();
+        RolePermission rolePermission = RolePermission.builder().id(1L).roleId(1L).permissionId(1L).build();
 
-        when(rolePermissionRepository.findAll()).thenReturn(List.of(entity));
+        when(rolePermissionRepository.findAll()).thenReturn(List.of(rolePermission));
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(permissionRepository.findById(1L)).thenReturn(Optional.of(permission));
 
         // Act
         RolePermissionsDto result = rolePermissionService.getAllRolePermissions();
@@ -81,19 +78,12 @@ class RolePermissionServiceTest {
 
         Role role = Role.builder().id(1L).name("ADMIN").build();
         Permission permission = Permission.builder().id(2L).code("USER_READ").build();
-        RolePermissionEntity savedEntity = new RolePermissionEntity();
-        savedEntity.setId(1L);
-        savedEntity.setRole(new com.skydiveforecast.infrastructure.persistence.entity.RoleEntity());
-        savedEntity.getRole().setId(1L);
-        savedEntity.getRole().setName("ADMIN");
-        savedEntity.setPermission(new com.skydiveforecast.infrastructure.persistence.entity.PermissionEntity());
-        savedEntity.getPermission().setId(2L);
-        savedEntity.getPermission().setCode("USER_READ");
+        RolePermission savedRolePermission = RolePermission.builder().id(1L).roleId(1L).permissionId(2L).build();
 
         when(rolePermissionRepository.existsByRoleIdAndPermissionId(1L, 2L)).thenReturn(false);
         when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
         when(permissionRepository.findById(2L)).thenReturn(Optional.of(permission));
-        when(rolePermissionRepository.save(any())).thenReturn(savedEntity);
+        when(rolePermissionRepository.save(any())).thenReturn(savedRolePermission);
 
         // Act
         RolePermissionDto result = rolePermissionService.createRolePermission(dto);
@@ -129,5 +119,103 @@ class RolePermissionServiceTest {
         // Assert
         assertEquals(2, result.size());
         assertTrue(result.contains("USER_READ"));
+    }
+
+    @Test
+    @DisplayName("Should get role permissions by role id")
+    void getRolePermissionsByRoleId_Success() {
+        // Arrange
+        Role role = Role.builder().id(1L).name("ADMIN").build();
+        Permission permission = Permission.builder().id(1L).code("USER_READ").build();
+        RolePermission rolePermission = RolePermission.builder().id(1L).roleId(1L).permissionId(1L).build();
+
+        when(rolePermissionRepository.findByRoleId(1L)).thenReturn(List.of(rolePermission));
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(permissionRepository.findById(1L)).thenReturn(Optional.of(permission));
+
+        // Act
+        RolePermissionsDto result = rolePermissionService.getRolePermissionsByRoleId(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getRolePermissions().size());
+    }
+
+    @Test
+    @DisplayName("Should get role permissions by permission id")
+    void getRolePermissionsByPermissionId_Success() {
+        // Arrange
+        Role role = Role.builder().id(1L).name("ADMIN").build();
+        Permission permission = Permission.builder().id(1L).code("USER_READ").build();
+        RolePermission rolePermission = RolePermission.builder().id(1L).roleId(1L).permissionId(1L).build();
+
+        when(rolePermissionRepository.findByPermissionId(1L)).thenReturn(List.of(rolePermission));
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(permissionRepository.findById(1L)).thenReturn(Optional.of(permission));
+
+        // Act
+        RolePermissionsDto result = rolePermissionService.getRolePermissionsByPermissionId(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getRolePermissions().size());
+    }
+
+    @Test
+    @DisplayName("Should delete role permission successfully")
+    void deleteRolePermission_Success() {
+        // Arrange
+        RolePermission rolePermission = RolePermission.builder().id(1L).roleId(1L).permissionId(1L).build();
+        when(rolePermissionRepository.findById(1L)).thenReturn(Optional.of(rolePermission));
+
+        // Act
+        rolePermissionService.deleteRolePermission(1L);
+
+        // Assert
+        verify(rolePermissionRepository).delete(rolePermission);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when role not found")
+    void createRolePermission_WhenRoleNotFound_ThrowsException() {
+        // Arrange
+        CreateRolePermissionDto dto = new CreateRolePermissionDto();
+        dto.setRoleId(1L);
+        dto.setPermissionId(2L);
+
+        when(rolePermissionRepository.existsByRoleIdAndPermissionId(1L, 2L)).thenReturn(false);
+        when(roleRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> rolePermissionService.createRolePermission(dto));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when permission not found")
+    void createRolePermission_WhenPermissionNotFound_ThrowsException() {
+        // Arrange
+        CreateRolePermissionDto dto = new CreateRolePermissionDto();
+        dto.setRoleId(1L);
+        dto.setPermissionId(2L);
+
+        Role role = Role.builder().id(1L).name("ADMIN").build();
+
+        when(rolePermissionRepository.existsByRoleIdAndPermissionId(1L, 2L)).thenReturn(false);
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(permissionRepository.findById(2L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> rolePermissionService.createRolePermission(dto));
+    }
+
+    @Test
+    @DisplayName("Should delete role permission when not found throws exception")
+    void deleteRolePermission_NotFound_ThrowsException() {
+        // Arrange
+        when(rolePermissionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(jakarta.persistence.EntityNotFoundException.class, 
+            () -> rolePermissionService.deleteRolePermission(999L));
     }
 }

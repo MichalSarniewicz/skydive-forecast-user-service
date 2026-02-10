@@ -1,6 +1,6 @@
 package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
+import com.skydiveforecast.domain.model.User;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateUserDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,6 +10,6 @@ public interface CreateUserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
-    @Mapping(target = "roles", ignore = true)
-    UserEntity toEntity(CreateUserDto dto);
+    @Mapping(target = "isActive", constant = "true")
+    User toDomain(CreateUserDto dto);
 }

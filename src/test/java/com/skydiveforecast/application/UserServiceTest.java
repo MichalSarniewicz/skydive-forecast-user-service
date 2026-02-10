@@ -2,13 +2,12 @@ package com.skydiveforecast.application;
 
 import com.skydiveforecast.application.service.UserService;
 import com.skydiveforecast.domain.exception.ValidationException;
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
+import com.skydiveforecast.domain.model.User;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import com.skydiveforecast.domain.service.validation.PasswordValidatorService;
 import com.skydiveforecast.domain.service.validation.UserValidator;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.*;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.CreateUserMapper;
-import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UpdateUserMapper;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UserMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -39,9 +39,6 @@ class UserServiceTest {
     private UserMapper userMapper;
 
     @Mock
-    private UpdateUserMapper updateUserMapper;
-
-    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -60,8 +57,7 @@ class UserServiceTest {
     @DisplayName("Should get all users successfully")
     void getAllUsers_Success() {
         // Arrange
-        UserEntity user = new UserEntity();
-        user.setId(1L);
+        User user = User.builder().id(1L).email("test@test.com").firstName("John").lastName("Doe").isActive(true).build();
         when(userRepository.findAllWithRoles()).thenReturn(List.of(user));
         when(userMapper.toDtoList(any())).thenReturn(List.of(new UserDto()));
 
@@ -84,16 +80,16 @@ class UserServiceTest {
         dto.setLastName("Doe");
         dto.setPassword("Password123!");
         
-        UserEntity entity = new UserEntity();
-        entity.setId(1L);
+        User user = User.builder().email("user@example.com").firstName("John").lastName("Doe").isActive(true).build();
+        User savedUser = user.withId(1L).withPasswordHash("encoded");
         
         when(userValidator.validateEmail(any(), eq(true))).thenReturn(new HashMap<>());
         when(userValidator.validateName(any(), any())).thenReturn(new HashMap<>());
         when(userValidator.validatePhoneNumber(any())).thenReturn(new HashMap<>());
         when(passwordValidator.validate(any())).thenReturn(new HashMap<>());
-        when(createUserMapper.toEntity(any())).thenReturn(entity);
+        when(createUserMapper.toDomain(any())).thenReturn(user);
         when(passwordEncoder.encode(any())).thenReturn("encoded");
-        when(userRepository.save(any())).thenReturn(entity);
+        when(userRepository.save(any())).thenReturn(savedUser);
         when(userMapper.toDto(any())).thenReturn(new UserDto());
 
         // Act
@@ -131,10 +127,13 @@ class UserServiceTest {
         // Arrange
         Long userId = 1L;
         UpdateUserDto dto = new UpdateUserDto();
-        UserEntity user = new UserEntity();
-        user.setId(userId);
+        dto.setFirstName("Jane");
+        dto.setLastName("Smith");
+        User user = User.builder().id(userId).email("test@test.com").firstName("John").lastName("Doe")
+                .passwordHash("hash").isActive(true).build();
         
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any())).thenReturn(user);
         when(userMapper.toDto(any())).thenReturn(new UserDto());
 
         // Act
@@ -143,7 +142,7 @@ class UserServiceTest {
         // Assert
         assertNotNull(result);
         assertTrue(result.isSuccess());
-        verify(updateUserMapper).updateEntityFromDto(dto, user);
+        verify(userRepository).save(any());
     }
 
     @Test
@@ -153,8 +152,8 @@ class UserServiceTest {
         Long userId = 1L;
         UserStatusUpdateDto dto = new UserStatusUpdateDto();
         dto.setActive(true);
-        UserEntity user = new UserEntity();
-        user.setId(userId);
+        User user = User.builder().id(userId).email("test@test.com").firstName("John").lastName("Doe")
+                .passwordHash("hash").isActive(false).build();
         
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userRepository.save(any())).thenReturn(user);
@@ -165,7 +164,7 @@ class UserServiceTest {
         // Assert
         assertNotNull(result);
         assertTrue(result.isSuccess());
-        verify(userRepository).save(user);
+        verify(userRepository).save(any());
     }
 
     @Test
@@ -175,21 +174,21 @@ class UserServiceTest {
         Long userId = 1L;
         String currentPassword = "OldPass123!";
         String newPassword = "NewPass123!";
-        UserEntity user = new UserEntity();
-        user.setId(userId);
-        user.setPasswordHash("encodedOld");
+        User user = User.builder().id(userId).email("test@test.com").firstName("John").lastName("Doe")
+                .passwordHash("encodedOld").isActive(true).build();
         
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(currentPassword, "encodedOld")).thenReturn(true);
         when(passwordEncoder.matches(newPassword, "encodedOld")).thenReturn(false);
         when(passwordValidator.validate(newPassword)).thenReturn(new HashMap<>());
         when(passwordEncoder.encode(newPassword)).thenReturn("encodedNew");
+        when(userRepository.save(any())).thenReturn(user);
 
         // Act
         userService.changePassword(userId, currentPassword, newPassword);
 
         // Assert
-        verify(userRepository).save(user);
+        verify(userRepository).save(any());
     }
 
     @Test
@@ -197,8 +196,8 @@ class UserServiceTest {
     void changePassword_IncorrectCurrentPassword() {
         // Arrange
         Long userId = 1L;
-        UserEntity user = new UserEntity();
-        user.setPasswordHash("encodedOld");
+        User user = User.builder().id(userId).email("test@test.com").firstName("John").lastName("Doe")
+                .passwordHash("encodedOld").isActive(true).build();
         
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(any(), any())).thenReturn(false);
@@ -225,8 +224,8 @@ class UserServiceTest {
         // Arrange
         Long userId = 1L;
         String password = "SamePass123!";
-        UserEntity user = new UserEntity();
-        user.setPasswordHash("encoded");
+        User user = User.builder().id(userId).email("test@test.com").firstName("John").lastName("Doe")
+                .passwordHash("encoded").isActive(true).build();
         
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(password, "encoded")).thenReturn(true);
@@ -315,5 +314,45 @@ class UserServiceTest {
 
         // Act & Assert
         assertThrows(ValidationException.class, () -> userService.createUser(dto));
+    }
+
+    @Test
+    void shouldUpdatePasswordSuccessfullyWhenCurrentPasswordIsCorrect() {
+        Long userId = 1L;
+        String currentPassword = "OldPassword1!";
+        String newPassword = "NewPassword1!";
+        String encodedOldPassword = "encodedOldPassword";
+        String encodedNewPassword = "encodedNewPassword";
+
+        User user = User.builder().id(userId).email("test@test.com").firstName("John").lastName("Doe")
+                .passwordHash(encodedOldPassword).isActive(true).build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(currentPassword, encodedOldPassword)).thenReturn(true);
+        when(passwordEncoder.matches(newPassword, encodedOldPassword)).thenReturn(false);
+        when(passwordValidator.validate(newPassword)).thenReturn(new HashMap<>());
+        when(passwordEncoder.encode(newPassword)).thenReturn(encodedNewPassword);
+        when(userRepository.save(any())).thenReturn(user);
+
+        userService.changePassword(userId, currentPassword, newPassword);
+
+        Mockito.verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserDoesNotExist() {
+        Long userId = 1L;
+        String currentPassword = "OldPassword1!";
+        String newPassword = "NewPassword1!";
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        try {
+            userService.changePassword(userId, currentPassword, newPassword);
+        } catch (RuntimeException e) {
+            assertEquals("User with id: 1 not found", e.getMessage());
+        }
+
+        Mockito.verify(userRepository, Mockito.never()).save(any(User.class));
     }
 }

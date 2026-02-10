@@ -1,7 +1,7 @@
 package com.skydiveforecast.application.service;
 
 import com.skydiveforecast.domain.exception.ValidationException;
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
+import com.skydiveforecast.domain.model.User;
 import com.skydiveforecast.domain.port.in.*;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import com.skydiveforecast.domain.service.validation.PasswordValidatorService;
@@ -30,7 +30,6 @@ public class UserService implements UpdateUserStatusUseCase, FindUserByIdUseCase
 
     private final UserRepositoryPort userRepository;
     private final UserMapper userMapper;
-    private final UpdateUserMapper updateUserMapper;
     private final PasswordEncoder passwordEncoder;
     private final CreateUserMapper createUserMapper;
     private final PasswordValidatorService passwordValidator;
@@ -39,19 +38,27 @@ public class UserService implements UpdateUserStatusUseCase, FindUserByIdUseCase
     @Override
     @CacheEvict(value = USERS_CACHE, allEntries = true)
     public UpdateUserResponse updateUser(Long userId, UpdateUserDto updateUserDto) {
-        UserEntity user = findUserById(userId);
-        updateUserMapper.updateEntityFromDto(updateUserDto, user);
-        UserDto updatedUserDto = userMapper.toDto(user);
+        User user = findUserById(userId);
+        User updatedUser = User.builder()
+                .id(user.id())
+                .email(user.email())
+                .passwordHash(user.passwordHash())
+                .firstName(updateUserDto.getFirstName())
+                .lastName(updateUserDto.getLastName())
+                .phoneNumber(updateUserDto.getPhoneNumber())
+                .isActive(user.isActive())
+                .build();
+        userRepository.save(updatedUser);
+        UserDto updatedUserDto = userMapper.toDto(updatedUser);
         return UpdateUserResponse.success("User updated successfully", updatedUserDto);
     }
 
     @Override
     @CacheEvict(value = USERS_CACHE, allEntries = true)
     public UserStatusUpdateResponse updateUserStatus(Long userId, UserStatusUpdateDto statusUpdateDto) {
-        UserEntity user = findUserById(userId);
-
-        user.setActive(statusUpdateDto.getActive());
-        userRepository.save(user);
+        User user = findUserById(userId);
+        User updatedUser = user.withIsActive(statusUpdateDto.getActive());
+        userRepository.save(updatedUser);
 
         String message = statusUpdateDto.getActive()
                 ? "User has been successfully activated"
@@ -61,7 +68,7 @@ public class UserService implements UpdateUserStatusUseCase, FindUserByIdUseCase
     }
 
     @Override
-    public UserEntity findUserById(Long userId) {
+    public User findUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id: " + userId + " not found"));
     }
@@ -69,15 +76,15 @@ public class UserService implements UpdateUserStatusUseCase, FindUserByIdUseCase
     @Override
     @CacheEvict(value = USERS_CACHE, allEntries = true)
     public void changePassword(Long userId, String currentPassword, String newPassword) {
-        UserEntity currentUser = findUserById(userId);
+        User currentUser = findUserById(userId);
 
-        if (!passwordEncoder.matches(currentPassword, currentUser.getPasswordHash())) {
+        if (!passwordEncoder.matches(currentPassword, currentUser.passwordHash())) {
             throw new ValidationException(Map.of("currentPassword", "Current password is incorrect"));
         }
 
         Map<String, String> passwordErrors = passwordValidator.validate(newPassword);
 
-        if (passwordEncoder.matches(newPassword, currentUser.getPasswordHash())) {
+        if (passwordEncoder.matches(newPassword, currentUser.passwordHash())) {
             passwordErrors.put("newPassword", "New password must be different from the current password");
         }
 
@@ -85,14 +92,14 @@ public class UserService implements UpdateUserStatusUseCase, FindUserByIdUseCase
             throw new ValidationException(passwordErrors);
         }
 
-        currentUser.setPasswordHash(passwordEncoder.encode(newPassword));
-        userRepository.save(currentUser);
+        User updatedUser = currentUser.withPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(updatedUser);
     }
 
     @Override
     @Cacheable(value = USERS_CACHE, key = "'all'")
     public UsersDto getAllUsers() {
-        List<UserEntity> entities = userRepository.findAllWithRoles();
+        List<User> entities = userRepository.findAllWithRoles();
         return new UsersDto(userMapper.toDtoList(entities));
     }
 
@@ -110,8 +117,8 @@ public class UserService implements UpdateUserStatusUseCase, FindUserByIdUseCase
             throw new ValidationException(errors);
         }
 
-        UserEntity entity = createUserMapper.toEntity(createUserDto);
-        entity.setPasswordHash(passwordEncoder.encode(createUserDto.getPassword()));
-        return userMapper.toDto(userRepository.save(entity));
+        User user = createUserMapper.toDomain(createUserDto);
+        User userWithPassword = user.withPasswordHash(passwordEncoder.encode(createUserDto.getPassword()));
+        return userMapper.toDto(userRepository.save(userWithPassword));
     }
 }

@@ -2,6 +2,7 @@ package com.skydiveforecast.application.service;
 
 import com.skydiveforecast.domain.model.Permission;
 import com.skydiveforecast.domain.model.Role;
+import com.skydiveforecast.domain.model.RolePermission;
 import com.skydiveforecast.infrastructure.persistence.entity.RolePermissionEntity;
 import com.skydiveforecast.domain.port.in.*;
 import com.skydiveforecast.domain.port.out.PermissionRepositoryPort;
@@ -51,8 +52,8 @@ public class RolePermissionService implements
     @Transactional(readOnly = true)
     @Cacheable(value = ROLE_PERMISSIONS_CACHE, key = "'all'")
     public RolePermissionsDto getAllRolePermissions() {
-        List<RolePermissionEntity> entities = rolePermissionRepository.findAll();
-        List<RolePermissionDto> dtoList = entities.stream()
+        List<RolePermission> rolePermissions = rolePermissionRepository.findAll();
+        List<RolePermissionDto> dtoList = rolePermissions.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
 
@@ -65,8 +66,8 @@ public class RolePermissionService implements
     @Transactional(readOnly = true)
     @Cacheable(value = ROLE_PERMISSIONS_CACHE, key = "'role:' + #roleId")
     public RolePermissionsDto getRolePermissionsByRoleId(Long roleId) {
-        List<RolePermissionEntity> entities = rolePermissionRepository.findByRoleId(roleId);
-        List<RolePermissionDto> dtoList = entities.stream()
+        List<RolePermission> rolePermissions = rolePermissionRepository.findByRoleId(roleId);
+        List<RolePermissionDto> dtoList = rolePermissions.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
         return RolePermissionsDto.builder()
@@ -78,8 +79,8 @@ public class RolePermissionService implements
     @Transactional(readOnly = true)
     @Cacheable(value = ROLE_PERMISSIONS_CACHE, key = "'permission:' + #permissionId")
     public RolePermissionsDto getRolePermissionsByPermissionId(Long permissionId) {
-        List<RolePermissionEntity> entities = rolePermissionRepository.findByPermissionId(permissionId);
-        List<RolePermissionDto> dtoList = entities.stream()
+        List<RolePermission> rolePermissions = rolePermissionRepository.findByPermissionId(permissionId);
+        List<RolePermissionDto> dtoList = rolePermissions.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
         return RolePermissionsDto.builder()
@@ -102,13 +103,13 @@ public class RolePermissionService implements
         Permission permission = permissionRepository.findById(createRolePermissionDto.getPermissionId())
                 .orElseThrow(() -> new IllegalArgumentException("Permission not found"));
 
-        RolePermissionEntity entity = RolePermissionEntity.builder()
-                .role(roleEntityMapper.toEntity(role))
-                .permission(permissionEntityMapper.toEntity(permission))
+        RolePermission rolePermission = RolePermission.builder()
+                .roleId(role.id())
+                .permissionId(permission.id())
                 .build();
 
-        RolePermissionEntity savedEntity = rolePermissionRepository.save(entity);
-        return mapToDto(savedEntity);
+        RolePermission savedRolePermission = rolePermissionRepository.save(rolePermission);
+        return mapToDto(savedRolePermission);
     }
 
     @Override
@@ -128,15 +129,15 @@ public class RolePermissionService implements
         rolePermissionRepository.deleteAllByRoleId(assignPermissionsToRoleDto.getRoleId());
 
         // Create new role-permission relationships
-        List<RolePermissionEntity> entities = permissions.stream()
-                .map(permission -> RolePermissionEntity.builder()
-                        .role(roleEntityMapper.toEntity(role))
-                        .permission(permissionEntityMapper.toEntity(permission))
+        List<RolePermission> rolePermissions = permissions.stream()
+                .map(permission -> RolePermission.builder()
+                        .roleId(role.id())
+                        .permissionId(permission.id())
                         .build())
                 .collect(Collectors.toList());
 
-        List<RolePermissionEntity> savedEntities = rolePermissionRepository.saveAll(entities);
-        return savedEntities.stream()
+        List<RolePermission> savedRolePermissions = rolePermissionRepository.saveAll(rolePermissions);
+        return savedRolePermissions.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
@@ -145,7 +146,7 @@ public class RolePermissionService implements
     @Transactional
     @CacheEvict(value = {ROLE_PERMISSIONS_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public void deleteRolePermission(Long id) {
-        RolePermissionEntity rolePermission = rolePermissionRepository.findById(id)
+        RolePermission rolePermission = rolePermissionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Role-Permission not found with ID: " + id));
         rolePermissionRepository.delete(rolePermission);
     }
@@ -159,13 +160,13 @@ public class RolePermissionService implements
     @Override
     @CacheEvict(value = {ROLE_PERMISSIONS_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public void deleteAllRolePermissionsByRoleId(Long roleId) {
-        List<RolePermissionEntity> entities = rolePermissionRepository.findByRoleId(roleId);
-        if (entities.isEmpty()) {
+        List<RolePermission> rolePermissions = rolePermissionRepository.findByRoleId(roleId);
+        if (rolePermissions.isEmpty()) {
             throw new EntityNotFoundException("No permissions found for role with ID: " + roleId);
         }
 
-        List<Long> ids = entities.stream()
-                .map(RolePermissionEntity::getId)
+        List<Long> ids = rolePermissions.stream()
+                .map(RolePermission::id)
                 .collect(Collectors.toList());
 
         ids.forEach(rolePermissionRepository::deleteById);
@@ -174,25 +175,30 @@ public class RolePermissionService implements
     @Override
     @CacheEvict(value = {ROLE_PERMISSIONS_CACHE, PERMISSION_CODES_CACHE}, allEntries = true)
     public void deleteAllRolePermissionsByPermissionId(Long permissionId) {
-        List<RolePermissionEntity> entities = rolePermissionRepository.findByPermissionId(permissionId);
-        if (entities.isEmpty()) {
+        List<RolePermission> rolePermissions = rolePermissionRepository.findByPermissionId(permissionId);
+        if (rolePermissions.isEmpty()) {
             throw new EntityNotFoundException("No role assignments found for permission with ID: " + permissionId);
         }
-        List<Long> ids = entities.stream()
-                .map(RolePermissionEntity::getId)
+        List<Long> ids = rolePermissions.stream()
+                .map(RolePermission::id)
                 .collect(Collectors.toList());
 
         ids.forEach(rolePermissionRepository::deleteById);
     }
 
-    private RolePermissionDto mapToDto(RolePermissionEntity entity) {
+    private RolePermissionDto mapToDto(RolePermission rolePermission) {
+        Role role = roleRepository.findById(rolePermission.roleId())
+                .orElseThrow(() -> new EntityNotFoundException("Role not found"));
+        Permission permission = permissionRepository.findById(rolePermission.permissionId())
+                .orElseThrow(() -> new EntityNotFoundException("Permission not found"));
+        
         return RolePermissionDto.builder()
-                .id(entity.getId())
-                .roleId(entity.getRole().getId())
-                .roleName(entity.getRole().getName())
-                .permissionId(entity.getPermission().getId())
-                .permissionCode(entity.getPermission().getCode())
-                .permissionDescription(entity.getPermission().getDescription())
+                .id(rolePermission.id())
+                .roleId(role.id())
+                .roleName(role.name())
+                .permissionId(permission.id())
+                .permissionCode(permission.code())
+                .permissionDescription(permission.description())
                 .build();
     }
 }

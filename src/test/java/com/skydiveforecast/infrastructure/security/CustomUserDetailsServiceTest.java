@@ -1,9 +1,8 @@
 package com.skydiveforecast.infrastructure.security;
 
-import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
-import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
+import com.skydiveforecast.domain.model.User;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
+import com.skydiveforecast.domain.port.out.UserRoleRepositoryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +13,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -27,6 +26,9 @@ class CustomUserDetailsServiceTest {
     @Mock
     private UserRepositoryPort userRepository;
 
+    @Mock
+    private UserRoleRepositoryPort userRoleRepository;
+
     @InjectMocks
     private CustomUserDetailsService customUserDetailsService;
 
@@ -35,23 +37,17 @@ class CustomUserDetailsServiceTest {
     void loadUserByUsername_Success() {
         // Arrange
         String email = "test@example.com";
-        RoleEntity role = RoleEntity.builder()
+        User user = User.builder()
                 .id(1L)
-                .name("USER")
+                .email(email)
+                .passwordHash("hashed-password")
+                .firstName("John")
+                .lastName("Doe")
+                .isActive(true)
                 .build();
-
-        UserRoleEntity userRole = UserRoleEntity.builder()
-                .role(role)
-                .build();
-
-        UserEntity user = new UserEntity();
-        user.setId(1L);
-        user.setEmail(email);
-        user.setPasswordHash("hashed-password");
-        user.setActive(true);
-        user.setRoles(new java.util.HashSet<>(List.of(userRole)));
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userRoleRepository.findRoleNamesByUserId(1L)).thenReturn(Set.of("USER"));
 
         // Act
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
@@ -89,35 +85,17 @@ class CustomUserDetailsServiceTest {
     void loadUserByUsername_MultipleRoles() {
         // Arrange
         String email = "admin@example.com";
-        RoleEntity adminRole = RoleEntity.builder()
+        User user = User.builder()
                 .id(1L)
-                .name("ADMIN")
+                .email(email)
+                .passwordHash("hashed-password")
+                .firstName("Admin")
+                .lastName("User")
+                .isActive(true)
                 .build();
-
-        RoleEntity userRole = RoleEntity.builder()
-                .id(2L)
-                .name("USER")
-                .build();
-
-        UserRoleEntity userRoleEntity1 = UserRoleEntity.builder()
-                .role(adminRole)
-                .build();
-
-        UserRoleEntity userRoleEntity2 = UserRoleEntity.builder()
-                .role(userRole)
-                .build();
-
-        UserEntity user = new UserEntity();
-        user.setId(1L);
-        user.setEmail(email);
-        user.setPasswordHash("hashed-password");
-        user.setFirstName("Admin");
-        user.setLastName("User");
-        user.setPhoneNumber(null);
-        user.setActive(true);
-        user.setRoles(new java.util.HashSet<>(List.of(userRoleEntity1, userRoleEntity2)));
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userRoleRepository.findRoleNamesByUserId(1L)).thenReturn(Set.of("ADMIN", "USER"));
 
         // Act
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);

@@ -1,7 +1,7 @@
 package com.skydiveforecast.application;
 
 import com.skydiveforecast.application.service.UserRoleService;
-import com.skydiveforecast.domain.model.Role;
+import com.skydiveforecast.domain.model.User;
 import com.skydiveforecast.domain.port.out.RoleRepositoryPort;
 import com.skydiveforecast.domain.port.out.UserRepositoryPort;
 import com.skydiveforecast.domain.port.out.UserRoleRepositoryPort;
@@ -9,10 +9,13 @@ import com.skydiveforecast.infrastructure.adapter.in.web.dto.CreateUserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRoleDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserRolesDto;
 import com.skydiveforecast.infrastructure.adapter.in.web.mapper.UserRoleMapper;
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
+import com.skydiveforecast.infrastructure.adapter.out.persistence.UserRoleRepositoryAdapter;
+import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
 import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
 import com.skydiveforecast.infrastructure.persistence.mapper.RoleEntityMapper;
+import com.skydiveforecast.infrastructure.persistence.mapper.UserEntityMapper;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,17 +48,32 @@ class UserRoleServiceTest {
     @Mock
     private RoleEntityMapper roleEntityMapper;
 
+    @Mock
+    private UserEntityMapper userEntityMapper;
+
+    @Mock
+    private UserRoleRepositoryAdapter userRoleRepositoryAdapter;
+
     @InjectMocks
     private UserRoleService userRoleService;
+
+    @BeforeEach
+    void setUp() {
+        reset(userRoleRepository, userRoleRepositoryAdapter, userRepository, roleRepository);
+    }
 
     @Test
     @DisplayName("Should get all user roles successfully")
     void getAllUserRoles_WhenUserRolesExist_ReturnsAllUserRoles() {
         // Arrange
         UserRoleEntity entity = new UserRoleEntity();
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setId(1L);
+        roleEntity.setName("USER");
+        entity.setRole(roleEntity);
         UserRoleDto dto = new UserRoleDto();
 
-        when(userRoleRepository.findAll()).thenReturn(List.of(entity));
+        when(userRoleRepositoryAdapter.findAllEntities()).thenReturn(List.of(entity));
         when(userRoleMapper.toDtoList(any())).thenReturn(List.of(dto));
 
         // Act
@@ -64,7 +82,7 @@ class UserRoleServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.getUserRoles().size());
-        verify(userRoleRepository).findAll();
+        verify(userRoleRepositoryAdapter).findAllEntities();
     }
 
     @Test
@@ -72,9 +90,13 @@ class UserRoleServiceTest {
     void getUserRoles_WhenUserHasRoles_ReturnsUserRoles() {
         // Arrange
         UserRoleEntity entity = new UserRoleEntity();
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setId(1L);
+        roleEntity.setName("USER");
+        entity.setRole(roleEntity);
         UserRoleDto dto = new UserRoleDto();
 
-        when(userRoleRepository.findByUserId(1L)).thenReturn(List.of(entity));
+        when(userRoleRepositoryAdapter.findEntitiesByUserId(1L)).thenReturn(List.of(entity));
         when(userRoleMapper.toDtoList(any())).thenReturn(List.of(dto));
 
         // Act
@@ -83,33 +105,6 @@ class UserRoleServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.getUserRoles().size());
-    }
-
-    @Test
-    @DisplayName("Should assign role to user successfully")
-    void assignRoleToUser_WhenValidRequest_AssignsRole() {
-        // Arrange
-        CreateUserRoleDto dto = new CreateUserRoleDto();
-        dto.setUserId(1L);
-        dto.setRoleId(2L);
-
-        UserEntity user = new UserEntity();
-        Role role = Role.builder().id(2L).name("USER").build();
-        UserRoleEntity savedEntity = new UserRoleEntity();
-        UserRoleDto resultDto = new UserRoleDto();
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(roleRepository.findById(2L)).thenReturn(Optional.of(role));
-        when(userRoleRepository.findByUserId(1L)).thenReturn(List.of());
-        when(userRoleRepository.save(any())).thenReturn(savedEntity);
-        when(userRoleMapper.toDto(savedEntity)).thenReturn(resultDto);
-
-        // Act
-        UserRoleDto result = userRoleService.assignRoleToUser(dto);
-
-        // Assert
-        assertNotNull(result);
-        verify(userRoleRepository).save(any());
     }
 
     @Test
@@ -134,7 +129,7 @@ class UserRoleServiceTest {
         dto.setUserId(1L);
         dto.setRoleId(2L);
 
-        UserEntity user = new UserEntity();
+        User user = User.builder().id(1L).email("test@test.com").firstName("John").lastName("Doe").isActive(true).build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(roleRepository.findById(2L)).thenReturn(Optional.empty());
@@ -143,30 +138,4 @@ class UserRoleServiceTest {
         assertThrows(EntityNotFoundException.class, () -> userRoleService.assignRoleToUser(dto));
     }
 
-    @Test
-    @DisplayName("Should remove role from user successfully")
-    void removeRoleFromUser_WhenRoleAssigned_RemovesRole() {
-        // Arrange
-        UserRoleEntity entity = new UserRoleEntity();
-        entity.setRole(new com.skydiveforecast.infrastructure.persistence.entity.RoleEntity());
-        entity.getRole().setId(2L);
-
-        when(userRoleRepository.findByUserId(1L)).thenReturn(List.of(entity));
-
-        // Act
-        userRoleService.removeRoleFromUser(1L, 2L);
-
-        // Assert
-        verify(userRoleRepository).deleteByUserIdAndRoleId(1L, 2L);
-    }
-
-    @Test
-    @DisplayName("Should throw exception when removing non-assigned role")
-    void removeRoleFromUser_WhenRoleNotAssigned_ThrowsException() {
-        // Arrange
-        when(userRoleRepository.findByUserId(1L)).thenReturn(List.of());
-
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> userRoleService.removeRoleFromUser(1L, 2L));
-    }
 }

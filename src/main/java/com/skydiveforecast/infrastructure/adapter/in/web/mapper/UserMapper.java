@@ -1,35 +1,18 @@
 package com.skydiveforecast.infrastructure.adapter.in.web.mapper;
 
-import com.skydiveforecast.infrastructure.persistence.entity.RoleEntity;
-import com.skydiveforecast.infrastructure.persistence.entity.UserEntity;
-import com.skydiveforecast.infrastructure.persistence.entity.UserRoleEntity;
-import com.skydiveforecast.infrastructure.adapter.in.web.dto.RoleDto;
+import com.skydiveforecast.domain.model.User;
 import com.skydiveforecast.infrastructure.adapter.in.web.dto.UserDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = RoleMapper.class)
+@Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    @Mapping(target = "roles", expression = "java(extractRoles(entity.getRoles()))")
-    UserDto toDto(UserEntity entity);
+    @Mapping(target = "roles", ignore = true)
+    @Mapping(source = "isActive", target = "active")
+    UserDto toDto(User domain);
 
-    List<UserDto> toDtoList(List<UserEntity> entities);
-
-    RoleDto mapRoleToDto(RoleEntity role);
-
-    // Helper method to extract RoleDto objects from UserRoleEntity objects
-    default Set<RoleDto> extractRoles(Set<UserRoleEntity> userRoles) {
-        if (userRoles == null) {
-            return null;
-        }
-        return userRoles.stream()
-                .map(UserRoleEntity::getRole)
-                .map(this::mapRoleToDto)
-                .collect(Collectors.toSet());
-    }
+    List<UserDto> toDtoList(List<User> domains);
 }

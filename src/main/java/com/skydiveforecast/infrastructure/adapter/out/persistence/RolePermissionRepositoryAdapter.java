@@ -1,43 +1,47 @@
 package com.skydiveforecast.infrastructure.adapter.out.persistence;
 
+import com.skydiveforecast.domain.model.RolePermission;
 import com.skydiveforecast.infrastructure.persistence.entity.RolePermissionEntity;
 import com.skydiveforecast.domain.port.out.RolePermissionRepositoryPort;
+import com.skydiveforecast.infrastructure.persistence.mapper.RolePermissionEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
 public class RolePermissionRepositoryAdapter implements RolePermissionRepositoryPort {
 
     private final RolePermissionJpaRepository jpaRepository;
+    private final RolePermissionEntityMapper mapper;
 
     @Override
-    public RolePermissionEntity save(RolePermissionEntity rolePermission) {
-        return jpaRepository.save(rolePermission);
+    public RolePermission save(RolePermission rolePermission) {
+        return mapper.toDomain(jpaRepository.save(mapper.toEntity(rolePermission)));
     }
 
     @Override
-    public Optional<RolePermissionEntity> findById(Long id) {
-        return jpaRepository.findById(id);
+    public Optional<RolePermission> findById(Long id) {
+        return jpaRepository.findById(id).map(mapper::toDomain);
     }
 
     @Override
-    public List<RolePermissionEntity> findByRoleId(Long roleId) {
-        return jpaRepository.findByRoleId(roleId);
+    public List<RolePermission> findByRoleId(Long roleId) {
+        return mapper.toDomainList(jpaRepository.findByRoleId(roleId));
     }
 
     @Override
-    public List<RolePermissionEntity> findByPermissionId(Long permissionId) {
-        return jpaRepository.findByPermissionId(permissionId);
+    public List<RolePermission> findByPermissionId(Long permissionId) {
+        return mapper.toDomainList(jpaRepository.findByPermissionId(permissionId));
     }
 
     @Override
-    public List<RolePermissionEntity> findAll() {
-        return jpaRepository.findAll();
+    public List<RolePermission> findAll() {
+        return mapper.toDomainList(jpaRepository.findAll());
     }
 
     @Override
@@ -76,12 +80,15 @@ public class RolePermissionRepositoryAdapter implements RolePermissionRepository
     }
 
     @Override
-    public List<RolePermissionEntity> saveAll(List<RolePermissionEntity> entities) {
-        return jpaRepository.saveAll(entities);
+    public List<RolePermission> saveAll(List<RolePermission> rolePermissions) {
+        List<RolePermissionEntity> entityList = rolePermissions.stream()
+                .map(mapper::toEntity)
+                .collect(Collectors.toList());
+        return mapper.toDomainList(jpaRepository.saveAll(entityList));
     }
 
     @Override
-    public void delete(RolePermissionEntity entity) {
-        jpaRepository.delete(entity);
+    public void delete(RolePermission entity) {
+        jpaRepository.delete(mapper.toEntity(entity));
     }
 }
