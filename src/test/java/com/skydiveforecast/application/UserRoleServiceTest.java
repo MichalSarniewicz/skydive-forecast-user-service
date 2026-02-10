@@ -137,5 +137,4 @@ class UserRoleServiceTest {
         // Act & Assert
         assertThrows(EntityNotFoundException.class, () -> userRoleService.assignRoleToUser(dto));
     }
-
 }

@@ -218,4 +218,121 @@ class RolePermissionServiceTest {
         assertThrows(jakarta.persistence.EntityNotFoundException.class, 
             () -> rolePermissionService.deleteRolePermission(999L));
     }
+
+    @Test
+    @DisplayName("Should assign permissions to role successfully")
+    void assignPermissionsToRole_WhenValidRequest_AssignsPermissions() {
+        // Arrange
+        com.skydiveforecast.infrastructure.adapter.in.web.dto.AssignPermissionsToRoleDto dto = 
+            new com.skydiveforecast.infrastructure.adapter.in.web.dto.AssignPermissionsToRoleDto();
+        dto.setRoleId(1L);
+        dto.setPermissionIds(Set.of(1L, 2L));
+
+        Role role = Role.builder().id(1L).name("ADMIN").build();
+        Permission permission1 = Permission.builder().id(1L).code("USER_READ").description("Read").build();
+        Permission permission2 = Permission.builder().id(2L).code("USER_WRITE").description("Write").build();
+        RolePermission savedRolePermission1 = RolePermission.builder().id(1L).roleId(1L).permissionId(1L).build();
+        RolePermission savedRolePermission2 = RolePermission.builder().id(2L).roleId(1L).permissionId(2L).build();
+
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(permissionRepository.findByIdIn(Set.of(1L, 2L))).thenReturn(List.of(permission1, permission2));
+        when(rolePermissionRepository.saveAll(any())).thenReturn(List.of(savedRolePermission1, savedRolePermission2));
+        when(permissionRepository.findById(1L)).thenReturn(Optional.of(permission1));
+        when(permissionRepository.findById(2L)).thenReturn(Optional.of(permission2));
+        doNothing().when(rolePermissionRepository).deleteAllByRoleId(1L);
+
+        // Act
+        List<RolePermissionDto> result = rolePermissionService.assignPermissionsToRole(dto);
+
+        // Assert
+        assertNotNull(result);
+        verify(rolePermissionRepository).deleteAllByRoleId(1L);
+        verify(rolePermissionRepository).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when role not found during assign")
+    void assignPermissionsToRole_WhenRoleNotFound_ThrowsException() {
+        // Arrange
+        com.skydiveforecast.infrastructure.adapter.in.web.dto.AssignPermissionsToRoleDto dto = 
+            new com.skydiveforecast.infrastructure.adapter.in.web.dto.AssignPermissionsToRoleDto();
+        dto.setRoleId(1L);
+        dto.setPermissionIds(Set.of(1L));
+
+        when(roleRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> rolePermissionService.assignPermissionsToRole(dto));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when permissions not found during assign")
+    void assignPermissionsToRole_WhenPermissionsNotFound_ThrowsException() {
+        // Arrange
+        com.skydiveforecast.infrastructure.adapter.in.web.dto.AssignPermissionsToRoleDto dto = 
+            new com.skydiveforecast.infrastructure.adapter.in.web.dto.AssignPermissionsToRoleDto();
+        dto.setRoleId(1L);
+        dto.setPermissionIds(Set.of(1L, 2L));
+
+        Role role = Role.builder().id(1L).name("ADMIN").build();
+        Permission permission1 = Permission.builder().id(1L).code("USER_READ").build();
+
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(permissionRepository.findByIdIn(Set.of(1L, 2L))).thenReturn(List.of(permission1));
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> rolePermissionService.assignPermissionsToRole(dto));
+    }
+
+    @Test
+    @DisplayName("Should delete all role permissions by role id")
+    void deleteAllRolePermissionsByRoleId_WhenPermissionsExist_DeletesAll() {
+        // Arrange
+        RolePermission rolePermission = RolePermission.builder().id(1L).roleId(1L).permissionId(2L).build();
+        when(rolePermissionRepository.findByRoleId(1L)).thenReturn(List.of(rolePermission));
+        doNothing().when(rolePermissionRepository).deleteById(1L);
+
+        // Act
+        rolePermissionService.deleteAllRolePermissionsByRoleId(1L);
+
+        // Assert
+        verify(rolePermissionRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when no permissions found for role")
+    void deleteAllRolePermissionsByRoleId_WhenNoPermissions_ThrowsException() {
+        // Arrange
+        when(rolePermissionRepository.findByRoleId(1L)).thenReturn(List.of());
+
+        // Act & Assert
+        assertThrows(jakarta.persistence.EntityNotFoundException.class, 
+            () -> rolePermissionService.deleteAllRolePermissionsByRoleId(1L));
+    }
+
+    @Test
+    @DisplayName("Should delete all role permissions by permission id")
+    void deleteAllRolePermissionsByPermissionId_WhenRolesExist_DeletesAll() {
+        // Arrange
+        RolePermission rolePermission = RolePermission.builder().id(1L).roleId(1L).permissionId(2L).build();
+        when(rolePermissionRepository.findByPermissionId(2L)).thenReturn(List.of(rolePermission));
+        doNothing().when(rolePermissionRepository).deleteById(1L);
+
+        // Act
+        rolePermissionService.deleteAllRolePermissionsByPermissionId(2L);
+
+        // Assert
+        verify(rolePermissionRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when no roles found for permission")
+    void deleteAllRolePermissionsByPermissionId_WhenNoRoles_ThrowsException() {
+        // Arrange
+        when(rolePermissionRepository.findByPermissionId(2L)).thenReturn(List.of());
+
+        // Act & Assert
+        assertThrows(jakarta.persistence.EntityNotFoundException.class, 
+            () -> rolePermissionService.deleteAllRolePermissionsByPermissionId(2L));
+    }
 }
